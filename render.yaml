@@ -1,17 +1,19 @@
 services:
   - type: web
-    name: snapbook-api
+    name: snapbook
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm ci --include=dev && npm run build
-    startCommand: node dist/main
+    buildCommand: npm run build
+    startCommand: npm start
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
+      - key: INTERNAL_API_PORT
+        value: 3001
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
@@ -22,8 +24,6 @@ services:
         value: slipsum
       - key: AUTH_REQUIRE_EMAIL_CONFIRM
         value: "false"
-      - key: FRONTEND_URL
-        value: "https://your-frontend-app.com"
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
