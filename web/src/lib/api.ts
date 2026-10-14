@@ -1,10 +1,18 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
-// When running in browser, proxy through Next.js rewrites at /api-backend
-const API_BASE_URL = typeof window !== 'undefined' ? '/api-backend' : (process.env.INTERNAL_API_URL || 'http://127.0.0.1:3001');
+export const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    const custom = localStorage.getItem('snapbook_api_url');
+    if (custom) return custom.replace(/\/+$/, '');
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      return (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001').replace(/\/+$/, '');
+    }
+  }
+  return (process.env.NEXT_PUBLIC_API_URL || 'https://snapbook-api.onrender.com').replace(/\/+$/, '');
+};
 
 export const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   timeout: 30000,
 });
 
@@ -39,8 +47,9 @@ export const TokenStorage = {
   },
 };
 
-// 1. Request interceptor: Attach Bearer token
+// 1. Request interceptor: Attach Bearer token & dynamic baseURL
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  config.baseURL = getApiBaseUrl();
   const token = TokenStorage.getAccessToken();
   if (token && config.headers) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -64,7 +73,7 @@ apiClient.interceptors.response.use(
 
       if (refreshToken) {
         try {
-          const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+          const { data } = await axios.post(`${getApiBaseUrl()}/auth/refresh`, {
             refresh_token: refreshToken,
           });
 
@@ -77,7 +86,8 @@ apiClient.interceptors.response.use(
         } catch (refreshErr) {
           TokenStorage.clear();
           if (typeof window !== 'undefined') {
-            window.location.href = '/login';
+            const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+            window.location.href = `${basePath}/login`;
           }
         }
       }

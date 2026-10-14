@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/navigation';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { getApiBaseUrl } from '@/lib/api';
 import {
   LayoutDashboard,
   Receipt,
@@ -66,7 +67,7 @@ export const Navbar = () => {
           {/* User profile & actions */}
           <div className="flex items-center space-x-4">
             <a
-              href="/docs"
+              href={`${getApiBaseUrl()}/docs`}
               target="_blank"
               rel="noreferrer"
               className="hidden sm:flex items-center space-x-1 text-xs text-slate-500 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-md transition"

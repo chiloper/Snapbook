@@ -1,34 +1,22 @@
 /** @type {import('next').NextConfig} */
+const isGithubActions = process.env.GITHUB_ACTIONS || false;
+
+// If deployed on GitHub Pages under https://<owner>.github.io/<repo>/
+let basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+if (!basePath && isGithubActions) {
+  const repo = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : '';
+  if (repo && !repo.endsWith('.github.io')) {
+    basePath = `/${repo}`;
+  }
+}
+
 const nextConfig = {
-  reactStrictMode: true,
+  output: 'export',
+  trailingSlash: true,
+  basePath: basePath || undefined,
+  assetPrefix: basePath ? `${basePath}/` : undefined,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-    ],
-  },
-  async rewrites() {
-    const apiHost = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3001';
-    return [
-      {
-        source: '/api-backend/:path*',
-        destination: `${apiHost}/:path*`,
-      },
-      {
-        source: '/docs/:path*',
-        destination: `${apiHost}/docs/:path*`,
-      },
-      {
-        source: '/docs',
-        destination: `${apiHost}/docs`,
-      },
-      {
-        source: '/health',
-        destination: `${apiHost}/health`,
-      },
-    ];
+    unoptimized: true,
   },
 };
 

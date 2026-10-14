@@ -1,77 +1,107 @@
 # Snapbook 📸💸
 
-A unified monorepo for income & expense tracking by reading Thai bank transfer slips (images) with Google Gemini AI.
+A modern income & expense tracking application by reading Thai bank transfer slips (images) with Google Gemini AI.
 
-- **`/web`**: Next.js 14 (App Router), Tailwind CSS, Lucide Icons, Chart.js frontend.
-- **`/api`**: NestJS 10+ REST API with `@google/genai` OCR, Supabase Auth, and custom `slipsum` database schema.
-- **Unified Deployment**: Deploy both frontend and backend together in a single Node.js service on [Render](https://render.com) using `render.yaml`.
+- **`/web`**: Next.js 14 (App Router) + Tailwind CSS + Lucide Icons + Chart.js, deployed automatically to **GitHub Pages**.
+- **`/api`**: NestJS 10+ REST API with `@google/genai` OCR, Supabase Auth, and custom `slipsum` database schema, deployed to **Render** with Smart Build Filters.
 
 ---
 
-## 📁 Monorepo Structure
+## 📁 Project Architecture
 
 ```text
 Snapbook/
-├── api/                    # NestJS Backend API
+├── .github/
+│   └── workflows/
+│       └── deploy-pages.yml  # GitHub Actions CI/CD to build & deploy Next.js to GitHub Pages
+├── api/                      # NestJS Backend API (Render Web Service)
 │   ├── src/
-│   │   ├── auth/           # Self-contained Supabase Auth endpoints
-│   │   ├── categories/     # System and custom category manager
-│   │   ├── common/         # Auth guards, decorators, global exception filters
-│   │   ├── extraction/     # Gemini AI slip OCR, fuzzy account matcher, Buddhist year
-│   │   ├── health/         # Render healthcheck endpoint
-│   │   ├── me/             # Profile & user registration status
-│   │   ├── own-accounts/   # User bank account management (4 last digits matching)
-│   │   ├── slips/          # Multi-image slip upload & storage
-│   │   ├── summary/        # Monthly analytics via Postgres RPC
-│   │   ├── supabase/       # Supabase client factory (slipsum schema)
-│   │   └── transactions/   # CRUD, pagination, and bulk review confirm
-│   ├── test/
+│   │   ├── auth/             # Supabase Auth endpoints (Register, Login, Refresh, Logout)
+│   │   ├── categories/       # Category manager (system defaults & custom user categories)
+│   │   ├── extraction/       # Gemini 2.5 Flash OCR, fuzzy account matcher, Buddhist year
+│   │   ├── health/           # Healthcheck endpoint for Render
+│   │   ├── own-accounts/     # User bank account management (4 last digits matching)
+│   │   ├── slips/            # Multi-image slip upload & storage
+│   │   ├── summary/          # Monthly analytics via Postgres RPC
+│   │   ├── supabase/         # Supabase client factory (slipsum schema)
+│   │   └── transactions/     # CRUD, pagination, and bulk review confirm
 │   ├── package.json
 │   └── tsconfig.json
-├── web/                    # Next.js Frontend Application
+├── web/                      # Next.js 14 Frontend Application (GitHub Pages)
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── accounts/   # Bank account management page
-│   │   │   ├── categories/ # Category management page
-│   │   │   ├── login/      # Sign-in page
-│   │   │   ├── register/   # Sign-up page
-│   │   │   ├── slips/      # Slip multi-upload & OCR real-time review page
+│   │   │   ├── accounts/     # Bank account management page
+│   │   │   ├── categories/   # Category management page
+│   │   │   ├── login/        # Sign-in page
+│   │   │   ├── register/     # Sign-up page
+│   │   │   ├── slips/        # Slip multi-upload & OCR real-time review page
 │   │   │   ├── transactions/ # Transaction manager & bulk confirm page
-│   │   │   ├── layout.tsx  # Root layout with responsive Navbar & AuthProvider
-│   │   │   └── page.tsx    # Monthly Dashboard (KPIs, Charts, Recent transactions)
-│   │   ├── components/     # UI components (Navbar, modals, badges)
-│   │   ├── context/        # AuthContext with automatic refresh token
-│   │   └── lib/            # Axios client with auto TOKEN_EXPIRED interception
-│   ├── next.config.js      # Internal API rewrite proxy (/api-backend -> NestJS)
+│   │   │   ├── layout.tsx    # Root layout with responsive Navbar & AuthProvider
+│   │   │   └── page.tsx      # Monthly Dashboard (KPIs, Charts, Recent transactions)
+│   │   ├── components/       # UI components (Navbar, modals, badges)
+│   │   ├── context/          # AuthContext with automatic refresh token
+│   │   └── lib/              # Axios client with auto TOKEN_EXPIRED interception & dynamic API URL
+│   ├── next.config.js        # Static export configuration for GitHub Pages
 │   └── package.json
-├── supabase/
-│   └── migrations/
-│       └── 001_init.sql    # Schema, RLS, functions, seed categories
-├── package.json            # Monorepo root scripts
-├── render.yaml             # Render deployment configuration
-└── start-all.js            # Monorepo process runner (spawns API + Next.js)
+├── render.yaml               # Render blueprint with buildFilter (only builds api/**)
+└── package.json              # Monorepo scripts for local development
 ```
 
 ---
 
-## 🌟 Key Features
+## 🌐 1. Deploy Frontend to GitHub Pages
 
-1. **Next.js Frontend (`/web`)**:
-   - Modern Dashboard with monthly income/expense summary, cashflow bar chart, and category donut chart.
-   - Slip upload dropzone supporting up to 10 images at once with real-time status and instant OCR review badges.
-   - Transaction list with review filter (`รอตรวจสอบ` vs `ทั้งหมด`), search, manual entry modal, and bulk confirm button.
-   - Bank accounts manager for registering personal account numbers (4 last digits) to automatically determine income vs expense.
-   - Category manager for both system defaults and custom user categories.
+The repository contains an automated GitHub Actions workflow (`.github/workflows/deploy-pages.yml`) that builds and deploys `/web` as a static site whenever changes are pushed to `web/**`.
 
-2. **NestJS Backend (`/api`)**:
-   - Structured slip extraction using `@google/genai` (Gemini 2.5 Flash).
-   - Thai Buddhist Era conversion (พ.ศ. 2567 -> 2024) with `Asia/Bangkok` timezone.
-   - Fuzzy account matching ignoring titles (นาย/นาง/นางสาว/Mr/Ms).
-   - Stored Postgres procedure `slipsum.get_monthly_summary` for instant floating-point-safe monthly aggregation.
+### Setup Steps on GitHub:
+1. Go to your repository on GitHub -> **Settings** -> **Pages**.
+2. Under **Build and deployment** > **Source**, select **GitHub Actions**.
+3. (Optional) Set your Render API URL:
+   - Go to **Settings** -> **Secrets and variables** -> **Actions** -> **Variables**.
+   - Click **New repository variable**.
+   - Name: `NEXT_PUBLIC_API_URL`
+   - Value: `https://snapbook-api.onrender.com` (your Render service URL).
+   - If not set, it defaults to `https://snapbook-api.onrender.com`.
 
-3. **Zero CORS Friction in Production**:
-   - Next.js proxies `/api-backend/:path*` directly to the local NestJS port `3001` via `next.config.js` rewrites.
-   - Swagger documentation is available directly at `/docs`.
+---
+
+## ⚡ 2. Deploy API to Render with Build Filters
+
+The API is configured via [`render.yaml`](./render.yaml) with `buildFilter`:
+- **Root Directory**: `api`
+- **Build Filter**: Render will **only** trigger builds when files in `api/**` change.
+- Changes to `web/**`, `.github/**`, or markdown files will **not** trigger a rebuild on Render, saving build minutes and compute time!
+
+```yaml
+services:
+  - type: web
+    name: snapbook-api
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: api
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: node dist/main
+    healthCheckPath: /health
+    buildFilter:
+      paths:
+        - api/**
+      ignoredPaths:
+        - api/README.md
+        - api/**/*.spec.ts
+```
+
+### Environment Variables on Render:
+Configure the following in the Render Dashboard:
+- `SUPABASE_URL`: Supabase project URL (e.g. `https://xxxx.supabase.co`)
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase Service Role Key
+- `SUPABASE_ANON_KEY`: Supabase Anon Key
+- `SUPABASE_DB_SCHEMA`: `slipsum`
+- `AUTH_REQUIRE_EMAIL_CONFIRM`: `false`
+- `FRONTEND_URL`: `https://chiloper.github.io`
+- `GEMINI_API_KEY`: Google AI Studio Gemini API Key
+- `GEMINI_MODEL`: `gemini-2.5-flash`
+- `CORS_ORIGINS`: `*`
 
 ---
 
@@ -81,36 +111,10 @@ Snapbook/
 # 1. Install all dependencies
 npm run install:all
 
-# 2. Build both projects
-npm run build
+# 2. Start both locally
+# Backend runs on http://localhost:3001
+cd api && npm run start:dev
 
-# 3. Run both web and api simultaneously
-npm start
-
-# Or develop individually:
-# In one terminal:
-cd api && npm run start:dev   # Runs on http://localhost:3001
-# In another terminal:
-cd web && npm run dev          # Runs on http://localhost:3000
+# In another terminal, Frontend runs on http://localhost:3000
+cd web && npm run dev
 ```
-
----
-
-## ☁️ Deploy to Render
-
-The repository includes a ready-to-use [`render.yaml`](./render.yaml) blueprint:
-- **Runtime**: `node`
-- **Plan**: `free`
-- **Region**: `singapore`
-- **Build Command**: `npm run build`
-- **Start Command**: `npm start`
-- **Health Check Path**: `/health`
-
-### Environment Variables on Render
-Set the following environment variables in the Render Dashboard:
-- `SUPABASE_URL`: Your Supabase HTTPS URL (e.g. `https://xxxx.supabase.co`)
-- `SUPABASE_SERVICE_ROLE_KEY`: Service role secret key
-- `SUPABASE_ANON_KEY`: Anon / public API key
-- `SUPABASE_DB_SCHEMA`: `slipsum`
-- `GEMINI_API_KEY`: Google AI Studio Gemini API Key
-- `GEMINI_MODEL`: `gemini-2.5-flash`

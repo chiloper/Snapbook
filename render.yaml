@@ -1,19 +1,24 @@
 services:
   - type: web
-    name: snapbook
+    name: snapbook-api
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm run build
-    startCommand: npm start
+    rootDir: api
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: node dist/main
     healthCheckPath: /health
+    buildFilter:
+      paths:
+        - api/**
+      ignoredPaths:
+        - api/README.md
+        - api/**/*.spec.ts
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 10000
-      - key: INTERNAL_API_PORT
-        value: 3001
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
@@ -24,6 +29,8 @@ services:
         value: slipsum
       - key: AUTH_REQUIRE_EMAIL_CONFIRM
         value: "false"
+      - key: FRONTEND_URL
+        value: "https://chiloper.github.io"
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
