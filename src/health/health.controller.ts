@@ -1,0 +1,19 @@
+import { Controller, Get } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Public } from '../common/decorators/public.decorator';
+
+@ApiTags('Health')
+@Controller('health')
+export class HealthController {
+  @Public()
+  @Get()
+  @ApiOperation({ summary: 'Health check endpoint (public, used to wake Render instance)' })
+  @ApiResponse({ status: 200, description: 'Service is healthy' })
+  check() {
+    return {
+      status: 'ok',
+      service: 'snapbook-api',
+      timestamp: new Date().toISOString(),
+    };
+  }
+}
