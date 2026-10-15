@@ -2,14 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { ownAccountsApi } from '@/lib/api';
-import { Building2, Plus, Trash2, ShieldCheck, X } from 'lucide-react';
+import { Building2, Plus, Trash2, ShieldCheck, X, CreditCard, CheckCircle2 } from 'lucide-react';
 
 export default function AccountsPage() {
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
-    bank_name: 'KBank',
+    bank_name: 'KBank (กสิกรไทย)',
     account_name: '',
     account_number_last4: '',
   });
@@ -40,7 +40,7 @@ export default function AccountsPage() {
     try {
       await ownAccountsApi.create(form);
       setIsModalOpen(false);
-      setForm({ bank_name: 'KBank', account_name: '', account_number_last4: '' });
+      setForm({ bank_name: 'KBank (กสิกรไทย)', account_name: '', account_number_last4: '' });
       fetchAccounts();
     } catch (err: any) {
       alert(err.response?.data?.message || 'ไม่สามารถเพิ่มบัญชีได้');
@@ -58,102 +58,144 @@ export default function AccountsPage() {
   };
 
   const thaiBanks = [
-    'KBank (กสิกรไทย)',
-    'SCB (ไทยพาณิชย์)',
-    'Krungthai (กรุงไทย)',
-    'Bangkok Bank (กรุงเทพ)',
-    'TTB (ทีทีบี)',
-    'Krungsri (กรุงศรี)',
-    'GSB (ออมสิน)',
-    'PromptPay (พร้อมเพย์)',
-    'TrueMoney Wallet',
+    { name: 'KBank (กสิกรไทย)', color: 'from-emerald-600 to-emerald-800', badge: 'bg-emerald-50 text-emerald-700' },
+    { name: 'SCB (ไทยพาณิชย์)', color: 'from-purple-600 to-indigo-800', badge: 'bg-purple-50 text-purple-700' },
+    { name: 'Krungthai (กรุงไทย)', color: 'from-sky-500 to-blue-700', badge: 'bg-sky-50 text-sky-700' },
+    { name: 'Bangkok Bank (กรุงเทพ)', color: 'from-blue-700 to-indigo-950', badge: 'bg-blue-50 text-blue-700' },
+    { name: 'TTB (ทีทีบี)', color: 'from-blue-600 to-orange-500', badge: 'bg-orange-50 text-orange-700' },
+    { name: 'Krungsri (กรุงศรี)', color: 'from-amber-500 to-amber-700', badge: 'bg-amber-50 text-amber-700' },
+    { name: 'GSB (ออมสิน)', color: 'from-pink-500 to-pink-700', badge: 'bg-pink-50 text-pink-700' },
+    { name: 'PromptPay (พร้อมเพย์)', color: 'from-blue-800 to-slate-900', badge: 'bg-blue-50 text-blue-800' },
+    { name: 'TrueMoney Wallet', color: 'from-orange-500 to-amber-600', badge: 'bg-orange-50 text-orange-700' },
   ];
 
+  const getBankStyle = (bankName: string) => {
+    const found = thaiBanks.find((b) => bankName.toLowerCase().includes(b.name.split(' ')[0].toLowerCase()));
+    return found || { name: bankName, color: 'from-slate-700 to-slate-900', badge: 'bg-slate-50 text-slate-700' };
+  };
+
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
             บัญชีธนาคารของฉัน
           </h1>
-          <p className="text-sm text-slate-500">
-            ระบบใช้ข้อมูลนี้ในการระบุว่าสลิปที่อ่านได้เป็น &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot;
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            ระบุเลขบัญชีตนเองเพื่อให้ AI ทราบว่าสลิปที่อ่านได้เป็น &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot;
           </p>
         </div>
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm transition"
+          className="inline-flex items-center space-x-2 bg-fastwork-500 hover:bg-fastwork-600 text-white text-sm font-bold px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-fastwork transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          <span>เพิ่มบัญชีใหม่</span>
+          <span>+ เพิ่มบัญชีใหม่</span>
         </button>
       </div>
 
-      {/* Info Callout */}
-      <div className="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 flex items-start space-x-3 text-sm text-indigo-900">
-        <ShieldCheck className="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" />
-        <p>
-          ระบบจัดเก็บเฉพาะ <strong>4 หลักสุดท้าย</strong> ของเลขบัญชีเท่านั้น
-          (เช่น xxx-x-x1234) เพื่อความปลอดภัยสูงสุดของคุณ
-        </p>
+      {/* Security Info Card */}
+      <div className="bg-fastwork-50/70 border border-fastwork-100 rounded-3xl p-5 flex items-start space-x-3.5 shadow-2xs">
+        <div className="p-2.5 bg-fastwork-100 text-fastwork-600 rounded-2xl flex-shrink-0">
+          <ShieldCheck className="w-5 h-5" />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-slate-900">
+            ระบบจัดเก็บอย่างปลอดภัย 100%
+          </h4>
+          <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
+            Snapbook จัดเก็บเฉพาะ <strong>4 หลักสุดท้าย</strong> ของเลขบัญชีเท่านั้น (เช่น •••• •••• 1234) เพื่อความปลอดภัยสูงสุดของคุณ และใช้สำหรับแมตช์ชื่อผู้โอน/ผู้รับในสลิป
+          </p>
+        </div>
       </div>
 
-      {/* Account List */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden divide-y divide-slate-100">
-        {loading ? (
-          <div className="py-12 text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto" />
+      {/* Accounts Grid */}
+      {loading ? (
+        <div className="py-16 text-center space-y-2">
+          <div className="w-8 h-8 rounded-full border-3 border-fastwork-100 border-t-fastwork-500 animate-spin mx-auto" />
+          <p className="text-xs text-slate-400 font-medium">กำลังโหลดบัญชีธนาคาร...</p>
+        </div>
+      ) : accounts.length === 0 ? (
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-12 text-center shadow-fastwork-sm space-y-3">
+          <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center mx-auto text-slate-300">
+            <Building2 className="w-8 h-8" />
           </div>
-        ) : accounts.length === 0 ? (
-          <div className="py-16 text-center text-slate-400 text-sm">
-            <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p>ยังไม่มีบัญชีที่ลงทะเบียนไว้</p>
-          </div>
-        ) : (
-          accounts.map((acc) => (
-            <div
-              key={acc.id}
-              className="p-5 flex items-center justify-between hover:bg-slate-50/70 transition"
-            >
-              <div className="flex items-center space-x-4">
-                <div className="w-11 h-11 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 font-bold">
-                  <Building2 className="w-5 h-5 text-indigo-600" />
-                </div>
+          <h3 className="font-extrabold text-slate-800 text-lg">ยังไม่มีบัญชีธนาคารที่ลงทะเบียน</h3>
+          <p className="text-xs text-slate-400 max-w-sm mx-auto">
+            กดปุ่ม &quot;เพิ่มบัญชีใหม่&quot; ด้านบนเพื่อเพิ่มบัญชีของคุณ แล้ว AI จะช่วยแยกรายรับรายจ่ายให้อัตโนมัติ
+          </p>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center space-x-1.5 bg-fastwork-50 text-fastwork-600 hover:bg-fastwork-100 font-bold text-xs px-4 py-2 rounded-xl transition"
+          >
+            <Plus className="w-4 h-4" />
+            <span>เพิ่มบัญชีตอนนี้</span>
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {accounts.map((acc) => {
+            const style = getBankStyle(acc.bank_name);
+            return (
+              <div
+                key={acc.id}
+                className="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-fastwork-sm hover:shadow-fastwork transition-all relative overflow-hidden group flex flex-col justify-between"
+              >
+                {/* Bank Header Color Strip */}
+                <div className={`h-2 absolute top-0 left-0 right-0 bg-gradient-to-r ${style.color}`}></div>
+
                 <div>
-                  <h4 className="font-semibold text-slate-800 text-base">
-                    {acc.bank_name}
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    ชื่อบัญชี: {acc.account_name} | เลขท้าย: ••••{' '}
-                    {acc.account_number_last4}
-                  </p>
+                  <div className="flex items-start justify-between">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      {acc.bank_name}
+                    </span>
+                    <button
+                      onClick={() => handleDelete(acc.id)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                      title="ลบบัญชีนี้"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
+                  <div className="mt-4">
+                    <p className="text-base font-extrabold text-slate-900 truncate">
+                      {acc.account_name}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <span className="font-mono text-lg font-bold text-fastwork-600 tracking-wider">
+                        •••• •••• {acc.account_number_last4}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                  <span className="flex items-center gap-1 text-emerald-600 font-medium text-[11px]">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    ตรวจจับอัตโนมัติ
+                  </span>
+                  <span>4 หลักท้าย</span>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              <button
-                onClick={() => handleDelete(acc.id)}
-                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                title="ลบบัญชี"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))
-        )}
-      </div>
-
-      {/* Add Account Modal */}
+      {/* Create Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-slate-800">
-                เพิ่มบัญชีธนาคาร
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+              <h3 className="text-lg font-extrabold text-slate-900">
+                เพิ่มบัญชีธนาคารของฉัน
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -161,49 +203,45 @@ export default function AccountsPage() {
 
             <form onSubmit={handleCreate} className="space-y-4 text-sm">
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  ธนาคาร / ผู้ให้บริการ
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  เลือกธนาคาร / กระเป๋าเงิน *
                 </label>
                 <select
                   value={form.bank_name}
-                  onChange={(e) =>
-                    setForm({ ...form, bank_name: e.target.value })
-                  }
-                  className="w-full border border-slate-200 rounded-xl p-2.5"
+                  onChange={(e) => setForm({ ...form, bank_name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 font-medium"
                 >
                   {thaiBanks.map((b) => (
-                    <option key={b} value={b.split(' ')[0]}>
-                      {b}
+                    <option key={b.name} value={b.name}>
+                      {b.name}
                     </option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
-                  ชื่อเจ้าของบัญชี (ภาษาไทยหรืออังกฤษตามสลิป) *
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  ชื่อบัญชี (ตามที่ปรากฏในสลิป) *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="เช่น สมชาย ใจดี หรือ Somchai Jaidee"
+                  placeholder="เช่น นาย สมชาย ใจดี หรือ SOMCHAI J."
                   value={form.account_name}
-                  onChange={(e) =>
-                    setForm({ ...form, account_name: e.target.value })
-                  }
-                  className="w-full border border-slate-200 rounded-xl p-2.5"
+                  onChange={(e) => setForm({ ...form, account_name: e.target.value })}
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500"
                 />
               </div>
 
               <div>
-                <label className="block font-medium text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   เลขบัญชี 4 หลักสุดท้าย *
                 </label>
                 <input
                   type="text"
-                  maxLength={4}
                   required
-                  placeholder="1234"
+                  maxLength={4}
+                  placeholder="เช่น 1234"
                   value={form.account_number_last4}
                   onChange={(e) =>
                     setForm({
@@ -211,23 +249,26 @@ export default function AccountsPage() {
                       account_number_last4: e.target.value.replace(/\D/g, ''),
                     })
                   }
-                  className="w-full border border-slate-200 rounded-xl p-2.5"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 font-mono tracking-widest font-bold text-base"
                 />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  ใส่เฉพาะตัวเลข 4 ตัวท้ายที่ปรากฏบนสลิปโอนเงิน
+                </p>
               </div>
 
-              <div className="flex space-x-3 pt-3">
+              <div className="flex justify-end space-x-2 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="flex-1 py-2.5 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 font-medium"
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 font-semibold shadow-sm"
+                  className="px-5 py-2.5 text-xs font-bold bg-fastwork-500 hover:bg-fastwork-600 text-white rounded-xl shadow-sm hover:shadow-fastwork transition"
                 >
-                  เพิ่มบัญชี
+                  บันทึกบัญชี
                 </button>
               </div>
             </form>

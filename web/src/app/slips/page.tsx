@@ -13,6 +13,10 @@ import {
   X,
   FileImage,
   ArrowRight,
+  Camera,
+  Sparkles,
+  Trash2,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function SlipsPage() {
@@ -26,15 +30,23 @@ export default function SlipsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    if (files.length > 10) {
-      alert('สามารถเลือกได้สูงสุดไม่เกิน 10 รูปต่อครั้งครับ');
+    if (files.length + selectedFiles.length > 10) {
+      alert('สามารถอัปโหลดได้สูงสุด 10 รูปต่อรอบครับ');
       return;
     }
 
-    setSelectedFiles(files);
-    const urls = files.map((file) => URL.createObjectURL(file));
+    const newFiles = [...selectedFiles, ...files];
+    setSelectedFiles(newFiles);
+    const urls = newFiles.map((file) => URL.createObjectURL(file));
     setPreviews(urls);
     setResults(null);
+  };
+
+  const handleRemoveFile = (index: number) => {
+    const updatedFiles = selectedFiles.filter((_, i) => i !== index);
+    setSelectedFiles(updatedFiles);
+    const updatedUrls = updatedFiles.map((file) => URL.createObjectURL(file));
+    setPreviews(updatedUrls);
   };
 
   const handleUpload = async () => {
@@ -64,17 +76,24 @@ export default function SlipsPage() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          สแกนสลิปธนาคารด้วย AI 📸
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">
-          รองรับสลิปธนาคารไทย (KBank, SCB, Krungthai, Bangkok Bank, TTB, GSB, พร้อมเพย์ ฯลฯ) สูงสุด 10 รูปพร้อมกัน
-        </p>
+      {/* Page Title */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+            <span>สแกนสลิปธนาคาร AI</span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-fastwork-50 text-fastwork-600 border border-fastwork-100 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-fastwork-500" />
+              Gemini 2.5
+            </span>
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            รองรับสลิปธนาคารไทยทุกแห่ง (กสิกร, ไทยพาณิชย์, กรุงไทย, กรุงเทพ, ทีทีบี, ออมสิน, พร้อมเพย์) สูงสุด 10 รูปพร้อมกัน
+          </p>
+        </div>
       </div>
 
-      {/* Upload Box */}
-      <div className="bg-white border-2 border-dashed border-slate-300 rounded-3xl p-8 text-center hover:border-indigo-500 transition shadow-sm">
+      {/* FASTWORK-STYLE UPLOAD ZONE */}
+      <div className="bg-white border-2 border-dashed border-fastwork-200 hover:border-fastwork-400 rounded-3xl p-6 sm:p-10 text-center transition-all shadow-fastwork-sm group">
         <input
           type="file"
           id="slip-upload"
@@ -84,27 +103,55 @@ export default function SlipsPage() {
           className="hidden"
           disabled={uploading}
         />
-        <label
-          htmlFor="slip-upload"
-          className="cursor-pointer flex flex-col items-center"
-        >
-          <div className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl mb-4">
+
+        <div className="flex flex-col items-center">
+          <div className="w-16 h-16 bg-fastwork-50 text-fastwork-500 rounded-3xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-fastwork-100 transition-all shadow-sm">
             <UploadCloud className="w-8 h-8" />
           </div>
-          <h3 className="text-base font-semibold text-slate-800">
-            คลิกเพื่อเลือกรูปภาพสลิป หรือลากไฟล์มาวาง
+
+          <h3 className="text-base sm:text-lg font-bold text-slate-800">
+            ลากสลิปมาวาง หรือคลิกเพื่อเลือกไฟล์
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
-            รองรับ JPG, PNG, WEBP (สูงสุด 10 รูป, ไม่เกิน 5MB ต่อรูป)
+          <p className="text-xs text-slate-400 mt-1 max-w-sm">
+            รองรับ JPG, PNG, WEBP (สูงสุด 10 รูป, ขนาดไม่เกิน 5MB ต่อไฟล์)
           </p>
-        </label>
+
+          {/* Action buttons (Camera on Mobile / File Picker) */}
+          <div className="flex items-center gap-3 mt-5">
+            <label
+              htmlFor="slip-upload"
+              className="cursor-pointer inline-flex items-center justify-center space-x-2 bg-fastwork-500 hover:bg-fastwork-600 text-white font-bold text-sm px-5 py-2.5 rounded-xl shadow-sm hover:shadow-fastwork transition-all active:scale-95"
+            >
+              <FileImage className="w-4 h-4" />
+              <span>เลือกจากคลังภาพ</span>
+            </label>
+
+            {/* Mobile Camera Option */}
+            <label
+              htmlFor="slip-camera"
+              className="sm:hidden cursor-pointer inline-flex items-center justify-center space-x-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm px-4 py-2.5 rounded-xl transition-all active:scale-95"
+            >
+              <Camera className="w-4 h-4" />
+              <span>ถ่ายรูป</span>
+            </label>
+            <input
+              type="file"
+              id="slip-camera"
+              accept="image/*"
+              capture="environment"
+              onChange={handleFileChange}
+              className="hidden"
+              disabled={uploading}
+            />
+          </div>
+        </div>
 
         {/* Selected files preview strip */}
         {selectedFiles.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3 text-sm">
-              <span className="font-semibold text-slate-700">
-                เลือกแล้ว {selectedFiles.length} รูป
+          <div className="mt-8 pt-6 border-t border-slate-100 text-left">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-bold text-slate-800">
+                สลิปที่เลือก ({selectedFiles.length}/10)
               </span>
               <button
                 onClick={() => {
@@ -112,7 +159,7 @@ export default function SlipsPage() {
                   setPreviews([]);
                   setResults(null);
                 }}
-                className="text-xs text-rose-500 hover:text-rose-700 font-medium"
+                className="text-xs text-rose-500 hover:text-rose-700 font-medium px-2 py-1 rounded-lg hover:bg-rose-50 transition"
               >
                 ล้างทั้งหมด
               </button>
@@ -122,7 +169,7 @@ export default function SlipsPage() {
               {previews.map((url, idx) => (
                 <div
                   key={idx}
-                  className="relative aspect-[3/4] rounded-xl overflow-hidden border border-slate-200 bg-slate-100"
+                  className="relative aspect-[3/4] rounded-2xl overflow-hidden border border-slate-200 bg-slate-50 group/item shadow-sm"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -130,44 +177,64 @@ export default function SlipsPage() {
                     alt="preview"
                     className="w-full h-full object-cover"
                   />
-                  <span className="absolute bottom-1 right-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
-                    #{idx + 1}
-                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-90 group-hover/item:opacity-100 transition-opacity">
+                    <span className="absolute top-1.5 left-1.5 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded-md font-semibold">
+                      #{idx + 1}
+                    </span>
+                    <button
+                      onClick={() => handleRemoveFile(idx)}
+                      className="absolute top-1.5 right-1.5 p-1 bg-rose-600/90 hover:bg-rose-600 text-white rounded-lg shadow-sm transition"
+                      title="ลบสลิปนี้"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="absolute bottom-1.5 left-1.5 right-1.5 text-white text-[10px] truncate px-1">
+                      {selectedFiles[idx]?.name}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
 
-            <button
-              onClick={handleUpload}
-              disabled={uploading}
-              className="mt-6 w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-sm transition disabled:opacity-50 flex items-center justify-center space-x-2 mx-auto"
-            >
-              {uploading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                  <span>AI กำลังประมวลผลสลิป...</span>
-                </>
-              ) : (
-                <span>เริ่มอ่านข้อมูลด้วย Gemini AI</span>
-              )}
-            </button>
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={handleUpload}
+                disabled={uploading}
+                className="w-full sm:w-auto px-8 py-3 bg-fastwork-500 hover:bg-fastwork-600 text-white font-extrabold text-sm sm:text-base rounded-2xl shadow-md hover:shadow-fastwork transition-all disabled:opacity-50 flex items-center justify-center space-x-2 active:scale-95"
+              >
+                {uploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                    <span>AI กำลังอ่านและประมวลผลสลิป...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-amber-300" />
+                    <span>เริ่มบันทึกด้วย Gemini AI ({selectedFiles.length} สลิป)</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Results List */}
+      {/* RESULTS LIST SECTION */}
       {results && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-            <h3 className="font-bold text-slate-800 text-lg">
-              ผลการประมวลผล ({results.length} ไฟล์)
-            </h3>
+        <div className="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-7 shadow-fastwork-sm space-y-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100">
+            <div>
+              <h3 className="font-extrabold text-slate-900 text-lg">
+                ผลการประมวลผลสลิป ({results.length} รายการ)
+              </h3>
+              <p className="text-xs text-slate-400">ตรวจสอบความถูกต้องและดูรูปสลิปต้นฉบับ</p>
+            </div>
             <NextLink
               href="/transactions"
-              className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center"
+              className="text-xs font-bold text-fastwork-600 hover:text-fastwork-700 bg-fastwork-50 px-3 py-1.5 rounded-xl flex items-center transition"
             >
               <span>ไปที่หน้ารายการธุรกรรม</span>
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </NextLink>
           </div>
 
@@ -180,32 +247,40 @@ export default function SlipsPage() {
               return (
                 <div
                   key={idx}
-                  className={`p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 ${
+                  className={`p-4 rounded-2xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all ${
                     isCreated
-                      ? 'bg-emerald-50/50 border-emerald-200'
+                      ? 'bg-emerald-50/40 border-emerald-200'
                       : isDuplicate
-                      ? 'bg-amber-50/50 border-amber-200'
-                      : 'bg-rose-50/50 border-rose-200'
+                      ? 'bg-amber-50/40 border-amber-200'
+                      : 'bg-rose-50/40 border-rose-200'
                   }`}
                 >
-                  <div className="flex items-start space-x-3">
-                    {isCreated && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    )}
-                    {isDuplicate && (
-                      <Copy className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-                    )}
-                    {isFailed && (
-                      <XCircle className="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" />
-                    )}
+                  <div className="flex items-start space-x-3 min-w-0">
+                    <div className="mt-0.5 flex-shrink-0">
+                      {isCreated && (
+                        <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                          <CheckCircle2 className="w-5 h-5" />
+                        </div>
+                      )}
+                      {isDuplicate && (
+                        <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                          <Copy className="w-5 h-5" />
+                        </div>
+                      )}
+                      {isFailed && (
+                        <div className="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center">
+                          <XCircle className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
 
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-slate-800 text-sm">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-slate-900 text-sm truncate max-w-[200px] sm:max-w-none">
                           {item.file_name}
                         </span>
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                          className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
                             isCreated
                               ? 'bg-emerald-100 text-emerald-800'
                               : isDuplicate
@@ -216,24 +291,20 @@ export default function SlipsPage() {
                           {isCreated
                             ? 'บันทึกสำเร็จ'
                             : isDuplicate
-                            ? 'สลิปซ้ำ'
-                            : 'ไม่ผ่าน'}
+                            ? 'สลิปซ้ำในระบบ'
+                            : 'ประมวลผลไม่สำเร็จ'}
                         </span>
                         {item.needs_type_review && (
-                          <span className="text-[11px] bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-medium flex items-center">
+                          <span className="text-[11px] bg-fastwork-100 text-fastwork-800 px-2 py-0.5 rounded-full font-semibold flex items-center">
                             <AlertCircle className="w-3 h-3 mr-1" />
-                            ควรตรวจเช็ครายรับ/รายจ่าย
+                            ควรตรวจสอบประเภท
                           </span>
                         )}
                       </div>
 
                       {isCreated && item.transaction && (
-                        <p className="text-xs text-slate-600 mt-1">
-                          {item.transaction.bank_name || 'ธนาคาร'} | ยอดเงิน: ฿
-                          {Number(item.transaction.amount).toLocaleString('th-TH', {
-                            minimumFractionDigits: 2,
-                          })}{' '}
-                          | คู่โอน: {item.transaction.counterparty_name || '-'}
+                        <p className="text-xs text-slate-600 mt-1 font-medium">
+                          {item.transaction.bank_name || 'ธนาคาร'} | ยอดเงิน: <span className="font-bold text-slate-900">฿{Number(item.transaction.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span> | คู่โอน: {item.transaction.counterparty_name || '-'}
                         </p>
                       )}
 
@@ -248,7 +319,7 @@ export default function SlipsPage() {
                   {item.slip_id && (
                     <button
                       onClick={() => handleViewSlipImage(item.slip_id)}
-                      className="text-xs font-medium text-slate-600 hover:text-indigo-600 bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-2xs hover:bg-slate-50 flex items-center space-x-1"
+                      className="text-xs font-semibold text-slate-700 hover:text-fastwork-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl shadow-2xs hover:bg-slate-50 flex items-center space-x-1.5 self-end sm:self-center transition"
                     >
                       <Eye className="w-3.5 h-3.5" />
                       <span>ดูรูปสลิป</span>
@@ -263,25 +334,26 @@ export default function SlipsPage() {
 
       {/* Slip Image Preview Modal */}
       {previewImageUrl && (
-        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl relative">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h4 className="font-semibold text-slate-800 text-sm">
-                รูปสลิปต้นฉบับ
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+              <h4 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                <FileImage className="w-4 h-4 text-fastwork-500" />
+                <span>รูปภาพสลิปต้นฉบับ</span>
               </h4>
               <button
                 onClick={() => setPreviewImageUrl(null)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 flex items-center justify-center max-h-[75vh] overflow-y-auto">
+            <div className="p-4 flex items-center justify-center max-h-[75vh] overflow-y-auto bg-slate-900/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewImageUrl}
                 alt="Slip Preview"
-                className="max-w-full max-h-[70vh] rounded-lg shadow-sm object-contain"
+                className="max-w-full max-h-[70vh] rounded-2xl shadow-md object-contain"
               />
             </div>
           </div>

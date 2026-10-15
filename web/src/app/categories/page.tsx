@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { categoriesApi } from '@/lib/api';
-import { Plus, Tag, Trash2, ShieldCheck, UserCheck, Loader2, AlertCircle } from 'lucide-react';
+import { Plus, Tag, Trash2, ShieldCheck, UserCheck, Loader2, AlertCircle, X, Sparkles } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -14,8 +14,8 @@ interface Category {
 }
 
 const PRESET_COLORS = [
-  '#EF4444', '#F97316', '#F59E0B', '#10B981', '#06B6D4',
-  '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#64748B'
+  '#0066FF', '#10B981', '#EF4444', '#F59E0B', '#8B5CF6',
+  '#EC4899', '#06B6D4', '#F97316', '#6366F1', '#64748B'
 ];
 
 export default function CategoriesPage() {
@@ -87,12 +87,14 @@ export default function CategoriesPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-4xl mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">จัดการหมวดหมู่ (Categories)</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+            จัดการหมวดหมู่
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
             หมวดหมู่เริ่มต้นจากระบบ และหมวดหมู่เพิ่มเติมที่คุณกำหนดขึ้นเอง
           </p>
         </div>
@@ -101,48 +103,48 @@ export default function CategoriesPage() {
             setError(null);
             setIsModalOpen(true);
           }}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-xl hover:bg-emerald-700 shadow-sm transition-colors"
+          className="inline-flex items-center justify-center space-x-2 bg-fastwork-500 hover:bg-fastwork-600 text-white text-sm font-bold px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-fastwork transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          เพิ่มหมวดหมู่ใหม่
+          <span>+ เพิ่มหมวดหมู่ใหม่</span>
         </button>
       </div>
 
       {error && (
-        <div className="rounded-xl bg-rose-50 p-4 border border-rose-200 flex items-start gap-3">
+        <div className="rounded-2xl bg-rose-50 p-4 border border-rose-200 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-rose-500 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-rose-800">{error}</div>
+          <div className="text-sm text-rose-800 font-medium">{error}</div>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      {/* Tabs (Fastwork Style) */}
+      <div className="flex bg-slate-100 p-1 rounded-2xl w-full sm:w-auto self-start">
         <button
           onClick={() => setFilterType('all')}
-          className={`pb-3 px-3 text-sm font-medium border-b-2 transition-colors ${
+          className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             filterType === 'all'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-white text-fastwork-600 shadow-sm'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           ทั้งหมด ({categories.length})
         </button>
         <button
           onClick={() => setFilterType('expense')}
-          className={`pb-3 px-3 text-sm font-medium border-b-2 transition-colors ${
+          className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             filterType === 'expense'
-              ? 'border-rose-600 text-rose-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-white text-rose-600 shadow-sm'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           รายจ่าย ({categories.filter((c) => c.type === 'expense').length})
         </button>
         <button
           onClick={() => setFilterType('income')}
-          className={`pb-3 px-3 text-sm font-medium border-b-2 transition-colors ${
+          className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
             filterType === 'income'
-              ? 'border-emerald-600 text-emerald-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
+              ? 'bg-white text-emerald-600 shadow-sm'
+              : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           รายรับ ({categories.filter((c) => c.type === 'income').length})
@@ -151,65 +153,68 @@ export default function CategoriesPage() {
 
       {/* Categories Grid */}
       {loading ? (
-        <div className="p-12 text-center text-gray-400">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-emerald-600 mb-2" />
-          กำลังโหลดหมวดหมู่...
+        <div className="py-16 text-center space-y-2">
+          <div className="w-8 h-8 rounded-full border-3 border-fastwork-100 border-t-fastwork-500 animate-spin mx-auto" />
+          <p className="text-xs text-slate-400 font-medium">กำลังโหลดหมวดหมู่...</p>
         </div>
       ) : filteredCategories.length === 0 ? (
-        <div className="p-12 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
-          <Tag className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-          ไม่พบหมวดหมู่ในประเภทนี้
+        <div className="p-12 text-center text-slate-400 bg-white rounded-3xl border border-slate-200/80 shadow-fastwork-sm space-y-2">
+          <Tag className="w-12 h-12 mx-auto text-slate-300" />
+          <p className="font-semibold text-slate-600">ไม่พบหมวดหมู่ในประเภทนี้</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {filteredCategories.map((category) => {
             const isSystem = !category.user_id;
             return (
               <div
                 key={category.id}
-                className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-shadow"
+                className="bg-white p-4 rounded-3xl border border-slate-200/80 shadow-fastwork-sm hover:shadow-fastwork transition-all flex flex-col justify-between group"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-start justify-between">
                   <span
-                    className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm shadow-sm"
+                    className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-extrabold text-sm shadow-sm"
                     style={{ backgroundColor: category.color || '#64748B' }}
                   >
                     {category.name.substring(0, 1)}
                   </span>
-                  <div>
-                    <h3 className="font-semibold text-gray-800 text-sm">{category.name}</h3>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span
-                        className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${
-                          category.type === 'income'
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'bg-rose-50 text-rose-700'
-                        }`}
-                      >
-                        {category.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
-                      </span>
-                      {isSystem ? (
-                        <span className="text-[10px] inline-flex items-center gap-0.5 text-gray-400">
-                          <ShieldCheck className="w-3 h-3 text-blue-500" /> ระบบ
-                        </span>
-                      ) : (
-                        <span className="text-[10px] inline-flex items-center gap-0.5 text-emerald-600">
-                          <UserCheck className="w-3 h-3" /> ผู้ใช้
-                        </span>
-                      )}
-                    </div>
-                  </div>
+
+                  {!isSystem && (
+                    <button
+                      onClick={() => handleDelete(category.id, category.name)}
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition"
+                      title="ลบหมวดหมู่นี้"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
                 </div>
 
-                {!isSystem && (
-                  <button
-                    onClick={() => handleDelete(category.id, category.name)}
-                    className="p-2 text-gray-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                    title="ลบหมวดหมู่นี้"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
+                <div className="mt-3">
+                  <h3 className="font-extrabold text-slate-900 text-sm truncate">
+                    {category.name}
+                  </h3>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        category.type === 'income'
+                          ? 'bg-emerald-50 text-emerald-700'
+                          : 'bg-rose-50 text-rose-700'
+                      }`}
+                    >
+                      {category.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
+                    </span>
+                    {isSystem ? (
+                      <span className="text-[10px] inline-flex items-center gap-0.5 text-slate-400">
+                        <ShieldCheck className="w-3 h-3 text-fastwork-500" /> ระบบ
+                      </span>
+                    ) : (
+                      <span className="text-[10px] inline-flex items-center gap-0.5 text-fastwork-600 font-medium">
+                        <UserCheck className="w-3 h-3" /> ผู้ใช้
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
             );
           })}
@@ -218,37 +223,47 @@ export default function CategoriesPage() {
 
       {/* Modal Create Category */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 space-y-5 animate-in fade-in duration-200">
-            <h2 className="text-lg font-bold text-gray-900">เพิ่มหมวดหมู่ใหม่</h2>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
+            <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+              <h3 className="text-lg font-extrabold text-slate-900">
+                เพิ่มหมวดหมู่ใหม่
+              </h3>
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleCreate} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  ชื่อหมวดหมู่
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  ชื่อหมวดหมู่ *
                 </label>
                 <input
                   type="text"
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="เช่น ช้อปปิ้งออนไลน์, เบี้ยเลี้ยง"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm"
+                  placeholder="เช่น ค่าเน็ต, ช้อปปิ้ง, ค่ากาแฟ"
+                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 text-sm font-medium"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   ประเภท
                 </label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setFormType('expense')}
-                    className={`py-2 px-3 text-sm font-medium rounded-xl border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${
                       formType === 'expense'
-                        ? 'bg-rose-50 border-rose-500 text-rose-700 font-semibold'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        ? 'bg-rose-50 border-rose-300 text-rose-700'
+                        : 'border-slate-200 text-slate-600'
                     }`}
                   >
                     รายจ่าย (Expense)
@@ -256,10 +271,10 @@ export default function CategoriesPage() {
                   <button
                     type="button"
                     onClick={() => setFormType('income')}
-                    className={`py-2 px-3 text-sm font-medium rounded-xl border text-center transition-colors ${
+                    className={`py-2 px-3 text-xs font-bold rounded-xl border transition-all ${
                       formType === 'income'
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-700 font-semibold'
-                        : 'border-gray-200 text-gray-600 hover:bg-gray-50'
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                        : 'border-slate-200 text-slate-600'
                     }`}
                   >
                     รายรับ (Income)
@@ -268,17 +283,17 @@ export default function CategoriesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-xs font-bold text-slate-700 mb-2">
                   เลือกสีสัญลักษณ์
                 </label>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2.5">
                   {PRESET_COLORS.map((c) => (
                     <button
                       key={c}
                       type="button"
                       onClick={() => setFormColor(c)}
-                      className={`w-7 h-7 rounded-full border-2 transition-transform ${
-                        formColor === c ? 'scale-110 border-gray-900' : 'border-transparent'
+                      className={`w-8 h-8 rounded-full border-2 transition-transform shadow-2xs ${
+                        formColor === c ? 'scale-115 border-slate-900 ring-2 ring-slate-400' : 'border-transparent'
                       }`}
                       style={{ backgroundColor: c }}
                     />
@@ -286,21 +301,21 @@ export default function CategoriesPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-3 border-t border-gray-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-xl transition-colors"
+                  className="px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
                 >
                   ยกเลิก
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-xl shadow-sm disabled:opacity-50 transition-colors flex items-center gap-2"
+                  className="px-5 py-2.5 text-xs font-bold text-white bg-fastwork-500 hover:bg-fastwork-600 rounded-xl shadow-sm hover:shadow-fastwork disabled:opacity-50 transition-all flex items-center gap-2"
                 >
                   {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
-                  บันทึกหมวดหมู่
+                  <span>บันทึกหมวดหมู่</span>
                 </button>
               </div>
             </form>
