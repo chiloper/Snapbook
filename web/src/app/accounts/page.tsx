@@ -74,6 +74,90 @@ export default function AccountsPage() {
     return found || { name: bankName, color: 'from-slate-700 to-slate-900', badge: 'bg-slate-50 text-slate-700' };
   };
 
+  const formatDisplayAccount = (bankName: string, accountNum: string): string => {
+    if (!accountNum) return '';
+    const digits = accountNum.replace(/\D/g, '');
+    const bankLower = (bankName || '').toLowerCase();
+
+    // 1. KBank / TTB format: xxx-x-x6789-x
+    if (
+      bankLower.includes('kbank') ||
+      bankLower.includes('กสิกร') ||
+      bankLower.includes('ttb') ||
+      bankLower.includes('ทีทีบี')
+    ) {
+      if (digits.length === 10) {
+        return `xxx-x-x${digits.slice(5, 9)}-x`;
+      }
+      const d4 = digits.length >= 4 ? digits.slice(-4) : digits.padStart(4, '0');
+      return `xxx-x-x${d4}-x`;
+    }
+
+    // 2. Bangkok Bank (BBL): xxx-x-xx789-x (3 visible digits before trailing mask)
+    if (
+      bankLower.includes('bangkok') ||
+      bankLower.includes('กรุงเทพ') ||
+      bankLower.includes('bbl')
+    ) {
+      if (digits.length === 10) {
+        return `xxx-x-xx${digits.slice(6, 9)}-x`;
+      }
+      const d3 = digits.length >= 3 ? digits.slice(-3) : digits.padStart(3, '0');
+      return `xxx-x-xx${d3}-x`;
+    }
+
+    // 3. SCB / Krungthai / BAAC: xxx-x-xx789-0
+    if (
+      bankLower.includes('scb') ||
+      bankLower.includes('ไทยพาณิชย์') ||
+      bankLower.includes('krungthai') ||
+      bankLower.includes('กรุงไทย') ||
+      bankLower.includes('ktb') ||
+      bankLower.includes('baac') ||
+      bankLower.includes('ธ.ก.ส')
+    ) {
+      if (digits.length >= 4) {
+        const last4 = digits.slice(-4);
+        return `xxx-x-xx${last4.slice(0, 3)}-${last4.slice(3)}`;
+      }
+      return `xxx-x-xx${digits}`;
+    }
+
+    // 4. Krungsri (BAY): xxx-x-xx789-x
+    if (bankLower.includes('krungsri') || bankLower.includes('กรุงศรี') || bankLower.includes('bay')) {
+      const d3 = digits.length >= 3 ? digits.slice(-3) : digits;
+      return `xxx-x-xx${d3}-x`;
+    }
+
+    // 5. GSB (ออมสิน): 020-x-xxxx78-9
+    if (bankLower.includes('gsb') || bankLower.includes('ออมสิน')) {
+      if (digits.length >= 3) {
+        const last3 = digits.slice(-3);
+        return `020-x-xxxx${last3.slice(0, 2)}-${last3.slice(2)}`;
+      }
+      return `020-x-xxxx${digits}`;
+    }
+
+    // 6. PromptPay (พร้อมเพย์) / TrueMoney
+    if (
+      bankLower.includes('promptpay') ||
+      bankLower.includes('พร้อมเพย์') ||
+      bankLower.includes('truemoney')
+    ) {
+      if (digits.length === 13) {
+        return `x-xxxx-xxxxx-${digits.slice(-3, -1)}-${digits.slice(-1)}`;
+      }
+      const d4 = digits.length >= 4 ? digits.slice(-4) : digits;
+      return `xxx-xxx-${d4}`;
+    }
+
+    // Default fallback
+    if (digits.length <= 4) {
+      return `xxx-x-x${digits}-x`;
+    }
+    return `${digits.slice(0, 3)}-xxxx-x${digits.slice(-4)}`;
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -166,9 +250,7 @@ export default function AccountsPage() {
                     </p>
                     <div className="flex items-center space-x-2 mt-2">
                       <span className="font-mono text-lg font-bold text-fastwork-600 tracking-wider">
-                        {acc.account_number_last4.length <= 4
-                          ? `•••• •••• ${acc.account_number_last4}`
-                          : `${acc.account_number_last4.slice(0, 3)}-••••-•${acc.account_number_last4.slice(-4)}`}
+                        {formatDisplayAccount(acc.bank_name, acc.account_number_last4)}
                       </span>
                     </div>
                   </div>
@@ -181,7 +263,7 @@ export default function AccountsPage() {
                   </span>
                   <span>
                     {acc.account_number_last4.length <= 4
-                      ? `${acc.account_number_last4.length} หลักท้าย`
+                      ? `${acc.account_number_last4.length} หลักบนสลิป`
                       : 'เลขบัญชีเต็ม'}
                   </span>
                 </div>
