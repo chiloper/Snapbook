@@ -11,6 +11,7 @@ export interface RawSlipExtraction {
   memo: string;
   is_bank_slip: boolean;
   confidence: number;
+  error?: string;
 }
 
 export interface ISlipExtractor {

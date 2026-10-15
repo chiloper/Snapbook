@@ -109,7 +109,19 @@ export class SlipsService {
           file.mimetype,
         );
 
-        // 5. Validation check: is_bank_slip & amount
+        // 5. Validation check: AI errors, is_bank_slip & amount
+        if (extraction.error) {
+          const failReason = `การประมวลผลด้วย AI ไม่สำเร็จ (${extraction.error})`;
+          await this.markSlipFailed(userId, slipId, failReason, extraction);
+          results.push({
+            file_name: fileName,
+            result: 'failed',
+            slip_id: slipId,
+            message: failReason,
+          });
+          continue;
+        }
+
         const amountNum = Number(extraction.amount);
         if (!extraction.is_bank_slip || isNaN(amountNum) || amountNum <= 0) {
           const failReason = !extraction.is_bank_slip
