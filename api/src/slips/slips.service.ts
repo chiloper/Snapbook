@@ -103,15 +103,15 @@ export class SlipsService {
           continue;
         }
 
-        // 4. Send image to Gemini slip extractor
+        // 4. Send image to Template slip extractor
         const extraction = await this.slipExtractor.extractFromImage(
           file.buffer,
           file.mimetype,
         );
 
-        // 5. Validation check: AI errors, is_bank_slip & amount
+        // 5. Validation check: extraction errors, is_bank_slip & amount
         if (extraction.error) {
-          const failReason = `การประมวลผลด้วย AI ไม่สำเร็จ (${extraction.error})`;
+          const failReason = `การสแกนสลิปไม่สำเร็จ (${extraction.error})`;
           await this.markSlipFailed(userId, slipId, failReason, extraction);
           results.push({
             file_name: fileName,

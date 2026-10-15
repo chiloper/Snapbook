@@ -30,7 +30,7 @@ export const Navbar = () => {
 
   const navItems = [
     { href: '/', label: 'ภาพรวมการเงิน', icon: LayoutDashboard },
-    { href: '/slips', label: 'สแกนสลิป AI', icon: Receipt },
+    { href: '/slips', label: 'สแกนสลิป', icon: Receipt },
     { href: '/transactions', label: 'รายการธุรกรรม', icon: FileSpreadsheet },
     { href: '/accounts', label: 'บัญชีของฉัน', icon: Building2 },
     { href: '/categories', label: 'หมวดหมู่', icon: Tags },
@@ -65,13 +65,13 @@ export const Navbar = () => {
                     Snap<span className="text-fastwork-500">book</span>
                   </span>
                   <span className="text-[10px] text-slate-400 font-normal tracking-wide -mt-1 hidden sm:inline">
-                    Smart AI Slip Tracker
+                    Smart Slip Tracker
                   </span>
                 </div>
               </NextLink>
             </div>
 
-            {/* 2. Middle: Fastwork-style Pill Search Bar with AI Sparkle */}
+            {/* 2. Middle: Fastwork-style Pill Search Bar */}
             <div className="hidden lg:flex flex-1 max-w-xl mx-4">
               <form
                 onSubmit={handleSearchSubmit}
@@ -88,10 +88,10 @@ export const Navbar = () => {
                 <NextLink
                   href="/slips"
                   className="ml-2 flex items-center space-x-1 bg-gradient-to-r from-fastwork-500 to-indigo-600 text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm hover:opacity-90 transition-opacity flex-shrink-0"
-                  title="สแกนสลิปด้วย AI"
+                  title="สแกนสลิป"
                 >
                   <Sparkles className="w-3 h-3 text-amber-300" />
-                  <span>AI Scan</span>
+                  <span>สแกนสลิป</span>
                 </NextLink>
               </form>
             </div>

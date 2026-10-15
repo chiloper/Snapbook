@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { GeminiSlipExtractorService } from './gemini-slip-extractor.service';
+import { TemplateSlipExtractorService } from './template-slip-extractor.service';
 import { SLIP_EXTRACTOR_TOKEN } from './interfaces/slip-extractor.interface';
 
 @Module({
   providers: [
-    GeminiSlipExtractorService,
+    TemplateSlipExtractorService,
     {
       provide: SLIP_EXTRACTOR_TOKEN,
-      useClass: GeminiSlipExtractorService,
+      useClass: TemplateSlipExtractorService,
     },
   ],
-  exports: [SLIP_EXTRACTOR_TOKEN, GeminiSlipExtractorService],
+  exports: [SLIP_EXTRACTOR_TOKEN, TemplateSlipExtractorService],
 })
 export class ExtractionModule {}

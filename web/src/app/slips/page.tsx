@@ -80,10 +80,10 @@ export default function SlipsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-            <span>สแกนสลิปธนาคาร AI</span>
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-fastwork-50 text-fastwork-600 border border-fastwork-100 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-fastwork-500" />
-              Gemini 2.5
+            <span>สแกนสลิปธนาคาร</span>
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-emerald-500" />
+              Template OCR
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
@@ -205,12 +205,12 @@ export default function SlipsPage() {
                 {uploading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                    <span>AI กำลังอ่านและประมวลผลสลิป...</span>
+                    <span>กำลังสแกนและประมวลผลสลิป...</span>
                   </>
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4 text-amber-300" />
-                    <span>เริ่มบันทึกด้วย Gemini AI ({selectedFiles.length} สลิป)</span>
+                    <span>เริ่มสแกนและบันทึกสลิป ({selectedFiles.length} สลิป)</span>
                   </>
                 )}
               </button>
