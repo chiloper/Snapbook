@@ -50,8 +50,8 @@ CRITICAL INSTRUCTIONS:
 3. For dates, Thai bank slips usually print dates in Buddhist Era (พ.ศ.) such as 2567 or 2568, and Thai month names/abbreviations (เช่น 14 ต.ค. 2567 14:30 น.).
    Convert the Buddhist year (พ.ศ.) to Common Era (ค.ศ.) by subtracting 543 (e.g., 2567 - 543 = 2024, 2568 - 543 = 2025).
    Provide the output as an ISO 8601 string in the Asia/Bangkok timezone (+07:00), e.g. "2024-10-14T14:30:00+07:00".
-4. Extract sender name and account/wallet number (often partially masked like xxx-x-x1234).
-5. Extract receiver/payee name and account/promptpay number.
+4. Extract sender name and account/wallet number exactly as printed on the slip, preserving any masking characters like 'x', 'X', '*', or '-' (e.g. 'xxx-x-x6789-x', 'xxx-xxx789-0', 'xxx-x-xx789-x', '020-x-xxxx78-9', 'xxx-xxx-1234', 'x-xxxx-xxxxx-12-3'). Do NOT alter or guess masked digits.
+5. Extract receiver/payee name and account/promptpay number exactly as printed on the slip, preserving any masking characters.
 6. Extract the unique transaction reference number (รหัสอ้างอิง / Transaction ID / Slip ID).
 7. Extract any memo, note (บันทึกช่วยจำ), or purpose if present.
 8. Output strictly adhering to the JSON schema.`;

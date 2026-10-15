@@ -32,8 +32,8 @@ export default function AccountsPage() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (form.account_number_last4.length !== 4) {
-      alert('กรุณาระบุเลขบัญชี 4 หลักสุดท้าย');
+    if (form.account_number_last4.length < 3 || form.account_number_last4.length > 15) {
+      alert('กรุณาระบุเลขบัญชี 3 ถึง 15 หลัก (เลข 3-4 ตัวที่เห็นบนสลิป หรือเลขบัญชีเต็ม)');
       return;
     }
 
@@ -103,10 +103,10 @@ export default function AccountsPage() {
         </div>
         <div>
           <h4 className="text-sm font-bold text-slate-900">
-            ระบบจัดเก็บอย่างปลอดภัย 100%
+            ระบบตรวจจับสลิปอัจฉริยะ รองรับทุกธนาคาร
           </h4>
           <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
-            Snapbook จัดเก็บเฉพาะ <strong>4 หลักสุดท้าย</strong> ของเลขบัญชีเท่านั้น (เช่น •••• •••• 1234) เพื่อความปลอดภัยสูงสุดของคุณ และใช้สำหรับแมตช์ชื่อผู้โอน/ผู้รับในสลิป
+            Snapbook รองรับทั้ง <strong>เลข 3-4 ตัวที่เห็นบนสลิป</strong> (เช่น 6789 ของกสิกร/ทีทีบี, 789 ของกรุงเทพ/ออมสิน) หรือ <strong>เลขบัญชีเต็ม 10-12 หลัก</strong> ระบบจะจับคู่กับสลิปอัตโนมัติอย่างแม่นยำ
           </p>
         </div>
       </div>
@@ -166,7 +166,9 @@ export default function AccountsPage() {
                     </p>
                     <div className="flex items-center space-x-2 mt-2">
                       <span className="font-mono text-lg font-bold text-fastwork-600 tracking-wider">
-                        •••• •••• {acc.account_number_last4}
+                        {acc.account_number_last4.length <= 4
+                          ? `•••• •••• ${acc.account_number_last4}`
+                          : `${acc.account_number_last4.slice(0, 3)}-••••-•${acc.account_number_last4.slice(-4)}`}
                       </span>
                     </div>
                   </div>
@@ -177,7 +179,11 @@ export default function AccountsPage() {
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     ตรวจจับอัตโนมัติ
                   </span>
-                  <span>4 หลักท้าย</span>
+                  <span>
+                    {acc.account_number_last4.length <= 4
+                      ? `${acc.account_number_last4.length} หลักท้าย`
+                      : 'เลขบัญชีเต็ม'}
+                  </span>
                 </div>
               </div>
             );
@@ -235,13 +241,13 @@ export default function AccountsPage() {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  เลขบัญชี 4 หลักสุดท้าย *
+                  เลขบัญชี / เบอร์พร้อมเพย์ *
                 </label>
                 <input
                   type="text"
                   required
-                  maxLength={4}
-                  placeholder="เช่น 1234"
+                  maxLength={15}
+                  placeholder="เช่น 6789 หรือเลขบัญชีเต็ม 10-12 หลัก"
                   value={form.account_number_last4}
                   onChange={(e) =>
                     setForm({
@@ -251,8 +257,8 @@ export default function AccountsPage() {
                   }
                   className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 font-mono tracking-widest font-bold text-base"
                 />
-                <p className="text-[11px] text-slate-400 mt-1">
-                  ใส่เฉพาะตัวเลข 4 ตัวท้ายที่ปรากฏบนสลิปโอนเงิน
+                <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">
+                  ระบุได้ทั้ง <strong>เลข 3-4 ตัวที่เห็นบนสลิป</strong> (เช่น กสิกร xxx-x-x<strong>6789</strong>-x หรือ กรุงเทพ xxx-x-xx<strong>789</strong>-x) หรือใส่ <strong>เลขบัญชีเต็ม 10-12 หลัก</strong>
                 </p>
               </div>
 

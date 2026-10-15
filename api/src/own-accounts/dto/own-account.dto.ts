@@ -12,10 +12,10 @@ export class CreateOwnAccountDto {
   @IsNotEmpty({ message: 'กรุณาระบุชื่อบัญชี' })
   account_name!: string;
 
-  @ApiProperty({ example: '1234', description: 'เลขบัญชี 4 หลักสุดท้าย' })
+  @ApiProperty({ example: '1234', description: 'เลขบัญชี (กรอก 3-4 ตัวที่เห็นบนสลิป หรือเลขบัญชีเต็ม 10-15 หลัก)' })
   @IsString()
-  @Length(4, 4, { message: 'เลขบัญชีต้องเป็น 4 หลักสุดท้าย' })
-  @Matches(/^\d{4}$/, { message: 'เลขบัญชี 4 หลักสุดท้ายต้องเป็นตัวเลขเท่านั้น' })
+  @Length(3, 15, { message: 'เลขบัญชีต้องมีความยาว 3 ถึง 15 หลัก' })
+  @Matches(/^\d{3,15}$/, { message: 'เลขบัญชีต้องเป็นตัวเลขเท่านั้น' })
   account_number_last4!: string;
 }
 
@@ -28,9 +28,9 @@ export class UpdateOwnAccountDto {
   @IsString()
   account_name?: string;
 
-  @ApiProperty({ example: '5678', description: 'เลขบัญชี 4 หลักสุดท้าย', required: false })
+  @ApiProperty({ example: '5678', description: 'เลขบัญชี (กรอก 3-4 ตัวที่เห็นบนสลิป หรือเลขบัญชีเต็ม 10-15 หลัก)', required: false })
   @IsString()
-  @Length(4, 4, { message: 'เลขบัญชีต้องเป็น 4 หลักสุดท้าย' })
-  @Matches(/^\d{4}$/, { message: 'เลขบัญชี 4 หลักสุดท้ายต้องเป็นตัวเลขเท่านั้น' })
+  @Length(3, 15, { message: 'เลขบัญชีต้องมีความยาว 3 ถึง 15 หลัก' })
+  @Matches(/^\d{3,15}$/, { message: 'เลขบัญชีต้องเป็นตัวเลขเท่านั้น' })
   account_number_last4?: string;
 }
