@@ -92,7 +92,7 @@ export default function AccountsPage() {
           className="inline-flex items-center space-x-2 bg-fastwork-500 hover:bg-fastwork-600 text-white text-sm font-bold px-4 py-2.5 rounded-2xl shadow-sm hover:shadow-fastwork transition-all active:scale-95"
         >
           <Plus className="w-4 h-4" />
-          <span>+ เพิ่มบัญชีใหม่</span>
+          <span>เพิ่มบัญชีใหม่</span>
         </button>
       </div>
 

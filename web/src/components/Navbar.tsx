@@ -104,7 +104,7 @@ export const Navbar = () => {
                 className="hidden sm:inline-flex items-center space-x-1.5 bg-fastwork-500 hover:bg-fastwork-600 text-white text-sm font-semibold px-4 py-2 rounded-xl shadow-sm hover:shadow-fastwork transition-all active:scale-[0.98]"
               >
                 <Camera className="w-4 h-4" />
-                <span>+ สแกนสลิป</span>
+                <span>สแกนสลิป</span>
               </NextLink>
 
               {/* Swagger API Button */}
