@@ -133,6 +133,7 @@ export const slipsApi = {
     });
     const res = await apiClient.post('/slips', formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 180000,
     });
     return res.data;
   },

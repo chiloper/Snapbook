@@ -22,7 +22,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { AuthenticatedUser } from '../common/interfaces/user.interface';
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 @ApiBearerAuth()
 @ApiTags('Slips')
@@ -31,11 +31,11 @@ export class SlipsController {
   constructor(private readonly slipsService: SlipsService) {}
 
   @Post()
-  @Throttle({ default: { limit: 10, ttl: 60000 } }) // Stricter rate limit on upload
+  @Throttle({ default: { limit: 30, ttl: 60000 } }) // Allow up to 30 upload requests per min
   @ApiOperation({
-    summary: 'Upload and process up to 10 Thai bank transfer slip images',
+    summary: 'Upload and process up to 30 Thai bank transfer slip images',
     description:
-      'Uploads images to Supabase Storage, extracts transaction details with Google Gemini, classifies income/expense, suggests category, and creates pending_review transactions.',
+      'Uploads images to Supabase Storage, extracts transaction details via Thai Bank Slip Template Matching Engine (OCR), classifies income/expense, suggests category, and creates pending_review transactions.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -48,7 +48,7 @@ export class SlipsController {
             type: 'string',
             format: 'binary',
           },
-          description: 'Slip image files (max 10 files, 5MB each, jpeg/png/webp)',
+          description: 'Slip image files (max 30 files, 10MB each, jpeg/png/webp)',
         },
       },
       required: ['files'],
@@ -59,7 +59,7 @@ export class SlipsController {
     description: 'Slips processed successfully',
   })
   @UseInterceptors(
-    FilesInterceptor('files', 10, {
+    FilesInterceptor('files', 30, {
       limits: {
         fileSize: MAX_FILE_SIZE,
       },
@@ -84,8 +84,8 @@ export class SlipsController {
       throw new BadRequestException('กรุณาเลือกไฟล์สลิปอย่างน้อย 1 ไฟล์');
     }
 
-    if (files.length > 10) {
-      throw new BadRequestException('สามารถอัปโหลดได้สูงสุดไม่เกิน 10 ไฟล์ต่อครั้ง');
+    if (files.length > 30) {
+      throw new BadRequestException('สามารถอัปโหลดได้สูงสุดไม่เกิน 30 ไฟล์ต่อครั้ง');
     }
 
     return this.slipsService.processSlips(user.id, files);

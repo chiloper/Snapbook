@@ -30,8 +30,8 @@ export default function SlipsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
-    if (files.length + selectedFiles.length > 10) {
-      alert('สามารถอัปโหลดได้สูงสุด 10 รูปต่อรอบครับ');
+    if (files.length + selectedFiles.length > 30) {
+      alert('สามารถอัปโหลดได้สูงสุด 30 รูปต่อรอบครับ');
       return;
     }
 
@@ -87,7 +87,7 @@ export default function SlipsPage() {
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            รองรับสลิปธนาคารไทยทุกแห่ง (กสิกร, ไทยพาณิชย์, กรุงไทย, กรุงเทพ, ทีทีบี, ออมสิน, พร้อมเพย์) สูงสุด 10 รูปพร้อมกัน
+            รองรับสลิปธนาคารไทยทุกแห่ง (กสิกร, ไทยพาณิชย์, กรุงไทย, กรุงเทพ, ทีทีบี, ออมสิน, พร้อมเพย์) สูงสุด 30 รูปพร้อมกัน
           </p>
         </div>
       </div>
@@ -113,7 +113,7 @@ export default function SlipsPage() {
             ลากสลิปมาวาง หรือคลิกเพื่อเลือกไฟล์
           </h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm">
-            รองรับ JPG, PNG, WEBP (สูงสุด 10 รูป, ขนาดไม่เกิน 5MB ต่อไฟล์)
+            รองรับ JPG, PNG, WEBP (สูงสุด 30 รูปต่อรอบ, ไม่จำกัดจำนวนรอบ)
           </p>
 
           {/* Action buttons (Camera on Mobile / File Picker) */}
@@ -151,7 +151,7 @@ export default function SlipsPage() {
           <div className="mt-8 pt-6 border-t border-slate-100 text-left">
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-bold text-slate-800">
-                สลิปที่เลือก ({selectedFiles.length}/10)
+                สลิปที่เลือก ({selectedFiles.length}/30)
               </span>
               <button
                 onClick={() => {

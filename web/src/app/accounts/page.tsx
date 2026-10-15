@@ -167,7 +167,7 @@ export default function AccountsPage() {
             บัญชีธนาคารของฉัน
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            ระบุเลขบัญชีตนเองเพื่อให้ AI ทราบว่าสลิปที่อ่านได้เป็น &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot;
+            ระบุเลขบัญชีตนเองเพื่อให้ระบบทราบว่าสลิปที่อ่านได้เป็น &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot;
           </p>
         </div>
 
@@ -208,7 +208,7 @@ export default function AccountsPage() {
           </div>
           <h3 className="font-extrabold text-slate-800 text-lg">ยังไม่มีบัญชีธนาคารที่ลงทะเบียน</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto">
-            กดปุ่ม &quot;เพิ่มบัญชีใหม่&quot; ด้านบนเพื่อเพิ่มบัญชีของคุณ แล้ว AI จะช่วยแยกรายรับรายจ่ายให้อัตโนมัติ
+            กดปุ่ม &quot;เพิ่มบัญชีใหม่&quot; ด้านบนเพื่อเพิ่มบัญชีของคุณ แล้วระบบจะช่วยแยกรายรับรายจ่ายให้อัตโนมัติ
           </p>
           <button
             onClick={() => setIsModalOpen(true)}

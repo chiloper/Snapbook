@@ -161,9 +161,9 @@ export default function DashboardPage() {
 
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-xl">
-            <div className="inline-flex items-center space-x-1.5 bg-white/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-medium text-amber-200">
-              <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>AI Engine Gemini 2.5 Flash</span>
+            <div className="inline-flex items-center space-x-1.5 bg-white/15 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold text-emerald-200">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+              <span>ระบบตรวจจับสลิปอัตโนมัติ ⚡</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight leading-snug">
               บันทึกสลิปโอนเงินอัจฉริยะ ⚡
@@ -176,16 +176,16 @@ export default function DashboardPage() {
           <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
             <NextLink
               href="/slips"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 bg-white text-fastwork-600 font-bold px-5 py-3 rounded-2xl hover:bg-fastwork-50 shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 bg-white text-fastwork-600 font-bold px-5 py-3 rounded-2xl hover:bg-fastwork-50 shadow-md hover:shadow-lg transition-all active:scale-[0.98] whitespace-nowrap"
             >
-              <Camera className="w-5 h-5 text-fastwork-600" />
-              <span>สแกนสลิปทันที</span>
+              <Camera className="w-5 h-5 text-fastwork-600 shrink-0" />
+              <span>สแกนสลิป</span>
             </NextLink>
             <NextLink
               href="/transactions"
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-4 py-3 rounded-2xl backdrop-blur-md transition-all active:scale-[0.98]"
+              className="flex-1 sm:flex-initial inline-flex items-center justify-center space-x-2 bg-white/15 hover:bg-white/25 text-white font-semibold px-4 py-3 rounded-2xl backdrop-blur-md transition-all active:scale-[0.98] whitespace-nowrap"
             >
-              <PlusCircle className="w-5 h-5" />
+              <PlusCircle className="w-5 h-5 shrink-0" />
               <span>บันทึกเอง</span>
             </NextLink>
           </div>
@@ -204,7 +204,7 @@ export default function DashboardPage() {
                 ยังไม่ได้ลงทะเบียนบัญชีธนาคารตนเอง
               </h4>
               <p className="text-xs text-amber-800 mt-0.5">
-                กรุณาเพิ่มเลข 4 ตัวท้ายของบัญชี เพื่อให้ AI สามารถจำแนก &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot; ได้แม่นยำ 100%
+                กรุณาเพิ่มเลข 4 ตัวท้ายของบัญชี เพื่อให้ระบบสามารถจำแนก &quot;รายรับ&quot; หรือ &quot;รายจ่าย&quot; ได้แม่นยำ 100%
               </p>
             </div>
           </div>

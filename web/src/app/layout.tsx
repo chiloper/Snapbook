@@ -4,8 +4,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { Navbar } from '@/components/Navbar';
 
 export const metadata = {
-  title: 'Snapbook — บันทึกรายรับ-รายจ่ายจากสลิปธนาคารด้วย AI',
-  description: 'Smart Thai bank slip income/expense tracker powered by Google Gemini AI',
+  title: 'Snapbook — บันทึกรายรับ-รายจ่ายจากสลิปธนาคารอัตโนมัติ',
+  description: 'Smart Thai bank slip income/expense tracker with automatic template-based OCR',
 };
 
 export default function RootLayout({
