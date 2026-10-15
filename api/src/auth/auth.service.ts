@@ -194,11 +194,17 @@ export class AuthService {
   }
 
   async forgotPassword(dto: ForgotPasswordDto) {
-    const frontendUrl = this.configService.get<string>(
+    const configuredFrontend = this.configService.get<string>(
       'FRONTEND_URL',
-      'http://localhost:3000',
+      'https://chiloper.github.io/Snapbook',
     );
-    const redirectTo = `${frontendUrl.replace(/\/$/, '')}/reset-password`;
+
+    let redirectTo = `${configuredFrontend.replace(/\/$/, '')}/reset-password`;
+    if (dto.redirect_to && dto.redirect_to.startsWith('http')) {
+      redirectTo = dto.redirect_to;
+    }
+
+    this.logger.log(`Sending password reset email for ${dto.email} with redirectTo: ${redirectTo}`);
 
     try {
       const anonClient = this.supabase.createAnonClient();

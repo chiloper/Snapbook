@@ -138,8 +138,18 @@ export const authApi = {
     const res = await apiClient.patch('/auth/password', { current_password, new_password });
     return res.data;
   },
-  forgotPassword: async (email: string) => {
-    const res = await apiClient.post('/auth/forgot-password', { email });
+  forgotPassword: async (email: string, redirectTo?: string) => {
+    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+    const dynamicRedirect =
+      redirectTo ||
+      (typeof window !== 'undefined'
+        ? `${window.location.origin}${basePath}/reset-password`
+        : undefined);
+
+    const res = await apiClient.post('/auth/forgot-password', {
+      email,
+      redirect_to: dynamicRedirect,
+    });
     return res.data;
   },
   resetPassword: async (access_token: string, new_password: string) => {

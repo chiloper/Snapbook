@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class RegisterDto {
   @ApiProperty({ example: 'user@example.com', description: 'User email' })
@@ -39,6 +39,15 @@ export class ForgotPasswordDto {
   @ApiProperty({ example: 'user@example.com', description: 'User email for recovery' })
   @IsEmail({}, { message: 'รูปแบบอีเมลไม่ถูกต้อง' })
   email!: string;
+
+  @ApiProperty({
+    example: 'https://chiloper.github.io/Snapbook/reset-password',
+    required: false,
+    description: 'Frontend redirect URL for password reset',
+  })
+  @IsOptional()
+  @IsString()
+  redirect_to?: string;
 }
 
 export class ResetPasswordDto {
