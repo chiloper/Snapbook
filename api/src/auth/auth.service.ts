@@ -199,9 +199,9 @@ export class AuthService {
       'https://chiloper.github.io/Snapbook',
     );
 
-    let redirectTo = `${configuredFrontend.replace(/\/$/, '')}/reset-password`;
+    let redirectTo = `${configuredFrontend.replace(/\/$/, '')}/reset-password/`;
     if (dto.redirect_to && dto.redirect_to.startsWith('http')) {
-      redirectTo = dto.redirect_to;
+      redirectTo = dto.redirect_to.endsWith('/') ? dto.redirect_to : `${dto.redirect_to}/`;
     }
 
     this.logger.log(`Sending password reset email for ${dto.email} with redirectTo: ${redirectTo}`);

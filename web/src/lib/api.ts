@@ -39,6 +39,10 @@ export const TokenStorage = {
       localStorage.setItem('user', JSON.stringify(user));
     }
   },
+  setAccessToken: (accessToken: string) => {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('access_token', accessToken);
+  },
   clear: () => {
     if (typeof window === 'undefined') return;
     localStorage.removeItem('access_token');
@@ -143,7 +147,7 @@ export const authApi = {
     const dynamicRedirect =
       redirectTo ||
       (typeof window !== 'undefined'
-        ? `${window.location.origin}${basePath}/reset-password`
+        ? `${window.location.origin}${basePath}/reset-password/`
         : undefined);
 
     const res = await apiClient.post('/auth/forgot-password', {

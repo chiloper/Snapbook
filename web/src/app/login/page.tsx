@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { useAlert } from '@/context/AlertContext';
-import { authApi } from '@/lib/api';
+import { authApi, TokenStorage } from '@/lib/api';
 import {
   Camera,
   Mail,
@@ -31,6 +31,23 @@ export default function LoginPage() {
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
   const [forgotMessage, setForgotMessage] = useState('');
+
+  // Check if user reached /login with recovery hash from Supabase email
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+      const isRecovery =
+        hash.includes('type=recovery') ||
+        search.includes('type=recovery') ||
+        (hash.includes('access_token=') && !TokenStorage.getAccessToken());
+
+      if (isRecovery) {
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        window.location.replace(`${window.location.origin}${basePath}/reset-password/${hash}${search}`);
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,6 +184,17 @@ export default function LoginPage() {
             )}
           </button>
         </form>
+
+        <div className="rounded-2xl bg-indigo-50/70 p-3 border border-indigo-100 flex items-center justify-between text-xs text-indigo-900">
+          <span>เพิ่งได้รับลิงก์รีเซ็ตรหัสผ่านทางอีเมล?</span>
+          <Link
+            href="/reset-password"
+            className="font-bold text-indigo-700 hover:text-indigo-800 hover:underline inline-flex items-center gap-1 ml-2 flex-shrink-0"
+          >
+            <span>ไปตั้งรหัสใหม่</span>
+            <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
 
         <div className="text-center pt-3 border-t border-slate-100">
           <p className="text-xs sm:text-sm text-slate-500">

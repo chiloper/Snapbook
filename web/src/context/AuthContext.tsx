@@ -29,11 +29,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isPublicPage =
     pathname === '/login' ||
+    pathname === '/login/' ||
     pathname === '/register' ||
+    pathname === '/register/' ||
     pathname === '/forgot-password' ||
+    pathname === '/forgot-password/' ||
     pathname?.startsWith('/reset-password');
 
   const checkAuth = async () => {
+    // 1. Intercept Supabase Auth URL callbacks (hash fragment or query)
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash || '';
+      const search = window.location.search || '';
+
+      // Check if this is a password recovery flow
+      const isRecovery =
+        hash.includes('type=recovery') ||
+        search.includes('type=recovery') ||
+        (hash.includes('access_token=') && !TokenStorage.getAccessToken() && !pathname?.startsWith('/reset-password'));
+
+      if (isRecovery && !pathname?.startsWith('/reset-password')) {
+        setLoading(false);
+        const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+        window.location.replace(`${window.location.origin}${basePath}/reset-password/${hash}${search}`);
+        return;
+      }
+
+      // Automatically store token on email confirmation signup callback
+      if (hash.includes('type=signup') || hash.includes('type=email_change')) {
+        const hashParams = new URLSearchParams(hash.substring(1));
+        const token = hashParams.get('access_token');
+        if (token) {
+          TokenStorage.setAccessToken(token);
+        }
+      }
+    }
+
     const token = TokenStorage.getAccessToken();
     if (!token) {
       setUser(null);

@@ -104,7 +104,7 @@ function ResetPasswordForm() {
             <div className="flex items-start gap-3">
               <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
               <div className="text-xs text-amber-900 leading-relaxed">
-                ไม่พบโทเคนใน URL (หากกดจากอีเมลแล้วเปิดผิดหน้า เช่น ไปที่ localhost:3000 ให้คัดลอกลิงก์นั้นมาวางที่ช่องด้านล่างนี้ได้เลยครับ)
+                ไม่พบโทเคนใน URL (หากกดลิงก์จากอีเมลแล้วเปิดผิดหน้า เช่น เด้งไปหน้า login หรือ localhost:3000 ให้คัดลอกลิงก์นั้นมาวางที่ช่องด้านล่างนี้ได้เลยครับ)
               </div>
             </div>
             <div>
