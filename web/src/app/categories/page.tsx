@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { categoriesApi } from '@/lib/api';
+import { useAlert } from '@/context/AlertContext';
 import { Plus, Tag, Trash2, ShieldCheck, UserCheck, Loader2, AlertCircle, X, Sparkles } from 'lucide-react';
 
 interface Category {
@@ -19,6 +20,7 @@ const PRESET_COLORS = [
 ];
 
 export default function CategoriesPage() {
+  const { toast, confirm } = useAlert();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterType, setFilterType] = useState<'all' | 'income' | 'expense'>('all');
@@ -62,6 +64,7 @@ export default function CategoriesPage() {
       });
       setIsModalOpen(false);
       setFormName('');
+      toast.success('สร้างหมวดหมู่ใหม่เรียบร้อยแล้ว');
       await loadCategories();
     } catch (err: any) {
       setError(err.response?.data?.message || 'ไม่สามารถสร้างหมวดหมู่ได้');
@@ -71,13 +74,20 @@ export default function CategoriesPage() {
   };
 
   const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`คุณต้องการลบหมวดหมู่ "${name}" ใช่หรือไม่?`)) return;
+    const ok = await confirm({
+      title: 'ลบหมวดหมู่',
+      message: `คุณต้องการลบหมวดหมู่ "${name}" ใช่หรือไม่?`,
+      confirmText: 'ลบหมวดหมู่',
+      type: 'danger',
+    });
+    if (!ok) return;
 
     try {
       await categoriesApi.delete(id);
       setCategories(categories.filter((c) => c.id !== id));
+      toast.success('ลบหมวดหมู่เรียบร้อยแล้ว');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถลบหมวดหมู่ได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถลบหมวดหมู่ได้');
     }
   };
 

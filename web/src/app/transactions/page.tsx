@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { transactionsApi, categoriesApi } from '@/lib/api';
+import { useAlert } from '@/context/AlertContext';
 import {
   Check,
   CheckCheck,
@@ -23,6 +24,7 @@ import {
 } from 'lucide-react';
 
 export default function TransactionsPage() {
+  const { toast, confirm } = useAlert();
   const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -89,36 +91,48 @@ export default function TransactionsPage() {
 
     if (pendingIds.length === 0) return;
 
-    if (!confirm(`ต้องการยืนยันรายการทั้งหมด ${pendingIds.length} รายการใช่หรือไม่?`)) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ยืนยันรายการทั้งหมด',
+      message: `ต้องการยืนยันรายการทั้งหมด ${pendingIds.length} รายการใช่หรือไม่?`,
+      confirmText: 'ยืนยันทั้งหมด',
+      type: 'info',
+    });
+    if (!ok) return;
 
     try {
       await transactionsApi.confirmBulk(pendingIds);
+      toast.success(`ยืนยันรายการสำเร็จ ${pendingIds.length} รายการ`);
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยืนยันรายการ');
+      toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยืนยันรายการ');
     }
   };
 
   const handleConfirmSingle = async (tx: any) => {
     try {
       await transactionsApi.update(tx.id, { status: 'confirmed' });
+      toast.success('ยืนยันรายการเรียบร้อยแล้ว');
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถยืนยันรายการได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถยืนยันรายการได้');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('ต้องการลบรายการนี้ใช่หรือไม่? (หากมาจากสลิป รูปสลิปจะถูกลบไปด้วย)')) {
-      return;
-    }
+    const ok = await confirm({
+      title: 'ลบรายการธุรกรรม',
+      message: 'ต้องการลบรายการนี้ใช่หรือไม่? (ข้อมูลจะถูกลบออกจากระบบอย่างถาวร)',
+      confirmText: 'ลบรายการ',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       await transactionsApi.delete(id);
       setTransactions((prev) => prev.filter((t) => t.id !== id));
+      toast.success('ลบรายการเรียบร้อยแล้ว');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถลบรายการได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถลบรายการได้');
     }
   };
 
@@ -136,9 +150,10 @@ export default function TransactionsPage() {
         status: 'confirmed',
       });
       setEditingTx(null);
+      toast.success('บันทึกการแก้ไขเรียบร้อยแล้ว');
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการแก้ไขรายการ');
+      toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการแก้ไขรายการ');
     }
   };
 
@@ -164,9 +179,10 @@ export default function TransactionsPage() {
         category_id: '',
         note: '',
       });
+      toast.success('บันทึกรายการสำเร็จ');
       fetchData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถสร้างรายการได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถสร้างรายการได้');
     }
   };
 

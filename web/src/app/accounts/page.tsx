@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { ownAccountsApi } from '@/lib/api';
+import { useAlert } from '@/context/AlertContext';
 import { Building2, Plus, Trash2, ShieldCheck, X, CreditCard, CheckCircle2 } from 'lucide-react';
 
 export default function AccountsPage() {
+  const { toast, confirm } = useAlert();
   const [accounts, setAccounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,7 +35,7 @@ export default function AccountsPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (form.account_number_last4.length < 3 || form.account_number_last4.length > 15) {
-      alert('กรุณาระบุเลขบัญชี 3 ถึง 15 หลัก (เลข 3-4 ตัวที่เห็นบนสลิป หรือเลขบัญชีเต็ม)');
+      toast.warning('กรุณาระบุเลขบัญชี 3 ถึง 15 หลัก (เลข 3-4 ตัวที่เห็นบนสลิป หรือเลขบัญชีเต็ม)');
       return;
     }
 
@@ -41,19 +43,28 @@ export default function AccountsPage() {
       await ownAccountsApi.create(form);
       setIsModalOpen(false);
       setForm({ bank_name: 'KBank (กสิกรไทย)', account_name: '', account_number_last4: '' });
+      toast.success('เพิ่มบัญชีธนาคารเรียบร้อยแล้ว');
       fetchAccounts();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถเพิ่มบัญชีได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถเพิ่มบัญชีได้');
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('ต้องการลบบัญชีนี้ใช่หรือไม่?')) return;
+    const ok = await confirm({
+      title: 'ลบบัญชีธนาคาร',
+      message: 'ต้องการลบบัญชีนี้ใช่หรือไม่? บัญชีนี้จะไม่ถูกนำไปใช้เทียบสลิปในอนาคต',
+      confirmText: 'ลบบัญชี',
+      type: 'danger',
+    });
+    if (!ok) return;
+
     try {
       await ownAccountsApi.delete(id);
       setAccounts((prev) => prev.filter((a) => a.id !== id));
+      toast.success('ลบบัญชีเรียบร้อยแล้ว');
     } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถลบบัญชีได้');
+      toast.error(err.response?.data?.message || 'ไม่สามารถลบบัญชีได้');
     }
   };
 

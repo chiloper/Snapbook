@@ -1,6 +1,7 @@
 import React from 'react';
 import './globals.css';
 import { AuthProvider } from '@/context/AuthContext';
+import { AlertProvider } from '@/context/AlertContext';
 import { Navbar } from '@/components/Navbar';
 
 export const metadata = {
@@ -25,10 +26,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-[#F7F9FB] text-slate-800 font-sans antialiased selection:bg-fastwork-100 selection:text-fastwork-700">
         <AuthProvider>
-          <Navbar />
-          <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-10">
-            {children}
-          </main>
+          <AlertProvider>
+            <Navbar />
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-24 md:pb-10">
+              {children}
+            </main>
+          </AlertProvider>
         </AuthProvider>
       </body>
     </html>

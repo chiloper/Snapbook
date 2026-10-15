@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { slipsApi } from '@/lib/api';
 import NextLink from 'next/link';
+import { useAlert } from '@/context/AlertContext';
 import {
   UploadCloud,
   CheckCircle2,
@@ -20,6 +21,7 @@ import {
 } from 'lucide-react';
 
 export default function SlipsPage() {
+  const { toast, alert: showAlert } = useAlert();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
@@ -31,7 +33,7 @@ export default function SlipsPage() {
     if (!e.target.files) return;
     const files = Array.from(e.target.files);
     if (files.length + selectedFiles.length > 30) {
-      alert('สามารถอัปโหลดได้สูงสุด 30 รูปต่อรอบครับ');
+      toast.warning('สามารถอัปโหลดได้สูงสุด 30 รูปต่อรอบครับ');
       return;
     }
 
@@ -55,8 +57,14 @@ export default function SlipsPage() {
     try {
       const data = await slipsApi.uploadSlips(selectedFiles);
       setResults(data);
+      const createdCount = data.filter((d: any) => d.result === 'created').length;
+      if (createdCount > 0) {
+        toast.success(`บันทึกสลิปสำเร็จ ${createdCount} รายการ`, 'สแกนสลิปสำเร็จ');
+      } else {
+        toast.info('ประมวลผลสลิปเรียบร้อยแล้ว โปรดตรวจสอบผลลัพธ์ด้านล่าง');
+      }
     } catch (err: any) {
-      alert(err.response?.data?.message || 'เกิดข้อผิดพลาดในการอัปโหลดสลิป');
+      toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการอัปโหลดสลิป');
     } finally {
       setUploading(false);
     }
@@ -67,7 +75,11 @@ export default function SlipsPage() {
       setPreviewImageUrl(previews[idx]);
       return;
     }
-    alert('ระบบไม่ได้จัดเก็บไฟล์รูปภาพไว้บนเซิร์ฟเวอร์ เพื่อความปลอดภัยของข้อมูลและลดภาระระบบ (บันทึกเฉพาะข้อมูลธุรกรรม)');
+    showAlert(
+      'ระบบไม่ได้จัดเก็บไฟล์รูปภาพไว้บนเซิร์ฟเวอร์ เพื่อความปลอดภัยของข้อมูลและลดภาระระบบ (บันทึกเฉพาะข้อมูลธุรกรรม)',
+      'นโยบายความเป็นส่วนตัว',
+      'info',
+    );
   };
 
   return (
