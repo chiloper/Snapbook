@@ -84,12 +84,21 @@ export class SlipsService {
         );
 
         if (uploadError) {
-          await this.markSlipFailed(userId, slipId, 'ไม่สามารถอัปโหลดรูปภาพไปยังที่จัดเก็บข้อมูลได้');
+          this.logger.error(`Upload to storage failed for slip ${slipId} (${fileName}): ${uploadError}`);
+          const isBucketNotFound =
+            uploadError.toLowerCase().includes('bucket not found') ||
+            uploadError.toLowerCase().includes('not found');
+
+          const failMsg = isBucketNotFound
+            ? 'ไม่พบบัคเก็ต "slips" ใน Supabase Storage (กรุณาสร้าง Bucket ชื่อ slips ใน Supabase Dashboard หรือรันคำสั่ง SQL)'
+            : `ไม่สามารถอัปโหลดรูปภาพไปยังที่จัดเก็บข้อมูลได้ (${uploadError})`;
+
+          await this.markSlipFailed(userId, slipId, failMsg);
           results.push({
             file_name: fileName,
             result: 'failed',
             slip_id: slipId,
-            message: 'ไม่สามารถอัปโหลดรูปภาพไปยังที่จัดเก็บข้อมูลได้',
+            message: failMsg,
           });
           continue;
         }

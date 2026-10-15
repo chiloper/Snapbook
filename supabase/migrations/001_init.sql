@@ -324,3 +324,21 @@ BEGIN
     );
 END;
 $$;
+
+-- 8. Storage bucket 'slips' creation and RLS policies
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'slips',
+    'slips',
+    false,
+    10485760, -- 10MB limit
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage policies for 'slips' bucket (Users can view their own slip uploads)
+DROP POLICY IF EXISTS "Users can read own slip objects" ON storage.objects;
+CREATE POLICY "Users can read own slip objects" ON storage.objects
+    FOR SELECT TO authenticated
+    USING (bucket_id = 'slips' AND (storage.foldername(name))[1] = auth.uid()::text);
+

@@ -1,9 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 @Injectable()
-export class SupabaseService {
+export class SupabaseService implements OnModuleInit {
   private readonly logger = new Logger(SupabaseService.name);
   private readonly client: SupabaseClient<any, any, any>;
   private readonly supabaseUrl: string;
@@ -45,6 +45,38 @@ export class SupabaseService {
         autoRefreshToken: false,
       },
     });
+  }
+
+  async onModuleInit() {
+    await this.ensureBucket('slips');
+  }
+
+  /**
+   * Automatically verifies and creates storage bucket if it does not exist yet.
+   */
+  async ensureBucket(bucket: string = 'slips'): Promise<void> {
+    try {
+      const { data: buckets, error } = await this.client.storage.listBuckets();
+      if (error) {
+        this.logger.warn(`Could not list storage buckets: ${error.message}`);
+        return;
+      }
+      const exists = buckets?.some((b) => b.id === bucket || b.name === bucket);
+      if (!exists) {
+        this.logger.log(`Storage bucket "${bucket}" does not exist. Creating it now...`);
+        const { error: createErr } = await this.client.storage.createBucket(bucket, {
+          public: false,
+          fileSizeLimit: 10485760, // 10MB
+        });
+        if (createErr) {
+          this.logger.error(`Failed to auto-create bucket "${bucket}": ${createErr.message}`);
+        } else {
+          this.logger.log(`Storage bucket "${bucket}" created successfully!`);
+        }
+      }
+    } catch (err: any) {
+      this.logger.warn(`Error ensuring storage bucket "${bucket}": ${err.message}`);
+    }
   }
 
   private normalizeSupabaseUrl(url: string): string {
@@ -112,15 +144,31 @@ export class SupabaseService {
     buffer: Buffer,
     contentType: string,
   ): Promise<{ path: string; error?: string }> {
-    const { data, error } = await this.client.storage
+    let { data, error } = await this.client.storage
       .from(bucket)
       .upload(path, buffer, {
         contentType,
-        upsert: false,
+        upsert: true,
       });
 
-    if (error) {
-      return { path: '', error: error.message };
+    // If bucket not found, attempt to auto-create bucket and retry
+    if (error && (error.message.toLowerCase().includes('not found') || (error as any).statusCode === 404)) {
+      this.logger.warn(`Bucket "${bucket}" not found during upload. Auto-creating bucket...`);
+      await this.ensureBucket(bucket);
+      const retry = await this.client.storage
+        .from(bucket)
+        .upload(path, buffer, {
+          contentType,
+          upsert: true,
+        });
+      data = retry.data;
+      error = retry.error;
+    }
+
+    if (error || !data) {
+      const errMsg = error?.message || 'No data returned from storage upload';
+      this.logger.error(`Failed to upload to storage bucket "${bucket}" at path "${path}": ${errMsg}`);
+      return { path: '', error: errMsg };
     }
     return { path: data.path };
   }
