@@ -47,12 +47,10 @@ export class SlipsService {
       const fileName = file.originalname || 'slip.jpg';
 
       try {
-        // 1. Determine storage path
-        const ext = this.getFileExtension(file.mimetype, fileName);
-        const fileUuid = randomUUID();
-        const storagePath = `${userId}/${fileUuid}.${ext}`;
-
-        // 2. Insert initial slip record with status 'processing'
+        // 1. Insert initial slip record with status 'processing'
+        // Note: Do not upload slip images to Supabase Storage to prevent upload failures
+        // and reduce system load. We process in-memory and save raw_extraction and transactions.
+        const storagePath = 'not_stored';
         const { data: slipRecord, error: slipInsertErr } = await this.supabase
           .getClient()
           .from('slips')
@@ -75,35 +73,7 @@ export class SlipsService {
 
         const slipId = slipRecord.id;
 
-        // 3. Upload to Supabase Storage private bucket 'slips'
-        const { error: uploadError } = await this.supabase.uploadSlipImage(
-          'slips',
-          storagePath,
-          file.buffer,
-          file.mimetype,
-        );
-
-        if (uploadError) {
-          this.logger.error(`Upload to storage failed for slip ${slipId} (${fileName}): ${uploadError}`);
-          const isBucketNotFound =
-            uploadError.toLowerCase().includes('bucket not found') ||
-            uploadError.toLowerCase().includes('not found');
-
-          const failMsg = isBucketNotFound
-            ? 'ไม่พบบัคเก็ต "slips" ใน Supabase Storage (กรุณาสร้าง Bucket ชื่อ slips ใน Supabase Dashboard หรือรันคำสั่ง SQL)'
-            : `ไม่สามารถอัปโหลดรูปภาพไปยังที่จัดเก็บข้อมูลได้ (${uploadError})`;
-
-          await this.markSlipFailed(userId, slipId, failMsg);
-          results.push({
-            file_name: fileName,
-            result: 'failed',
-            slip_id: slipId,
-            message: failMsg,
-          });
-          continue;
-        }
-
-        // 4. Send image to Template slip extractor
+        // 2. Send image buffer directly to Template slip extractor (in-memory)
         const extraction = await this.slipExtractor.extractFromImage(
           file.buffer,
           file.mimetype,
@@ -291,6 +261,10 @@ export class SlipsService {
 
     if (error || !slip) {
       throw new NotFoundException('ไม่พบข้อมูลสลิปที่ต้องการ');
+    }
+
+    if (!slip.storage_path || slip.storage_path === 'not_stored' || slip.storage_path === 'none') {
+      throw new NotFoundException('สลิปนี้ไม่ได้ถูกจัดเก็บรูปภาพไว้ในคลาวด์ (จัดเก็บเฉพาะข้อมูลดิบเพื่อความเป็นส่วนตัวและลดภาระระบบ)');
     }
 
     const { signedUrl, error: signError } = await this.supabase.createSignedUrl(

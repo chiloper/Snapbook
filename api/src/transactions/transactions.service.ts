@@ -224,8 +224,10 @@ export class TransactionsService {
         .eq('id', transaction.slip_id)
         .maybeSingle();
 
-      if (slip && slip.storage_path) {
-        await this.supabase.deleteSlipImage('slips', slip.storage_path);
+      if (slip) {
+        if (slip.storage_path && slip.storage_path !== 'not_stored' && slip.storage_path !== 'none') {
+          await this.supabase.deleteSlipImage('slips', slip.storage_path);
+        }
         await this.supabase
           .getClient()
           .from('slips')

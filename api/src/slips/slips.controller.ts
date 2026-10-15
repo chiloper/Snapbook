@@ -33,9 +33,9 @@ export class SlipsController {
   @Post()
   @Throttle({ default: { limit: 30, ttl: 60000 } }) // Allow up to 30 upload requests per min
   @ApiOperation({
-    summary: 'Upload and process up to 30 Thai bank transfer slip images',
+    summary: 'Upload and process up to 30 Thai bank transfer slip images in-memory',
     description:
-      'Uploads images to Supabase Storage, extracts transaction details via Thai Bank Slip Template Matching Engine (OCR), classifies income/expense, suggests category, and creates pending_review transactions.',
+      'Extracts transaction details from slip images directly in-memory via Thai Bank Slip Template Matching Engine (OCR) without storing images to cloud storage, classifies income/expense, suggests category, and creates pending_review transactions.',
   })
   @ApiConsumes('multipart/form-data')
   @ApiBody({

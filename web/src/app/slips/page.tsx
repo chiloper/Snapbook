@@ -62,16 +62,12 @@ export default function SlipsPage() {
     }
   };
 
-  const handleViewSlipImage = async (slipId: string) => {
-    setModalLoading(true);
-    try {
-      const res = await slipsApi.getImageUrl(slipId);
-      setPreviewImageUrl(res.signed_url);
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'ไม่สามารถเปิดดูรูปภาพได้');
-    } finally {
-      setModalLoading(false);
+  const handleViewSlipImage = (idx?: number) => {
+    if (typeof idx === 'number' && previews[idx]) {
+      setPreviewImageUrl(previews[idx]);
+      return;
     }
+    alert('ระบบไม่ได้จัดเก็บไฟล์รูปภาพไว้บนเซิร์ฟเวอร์ เพื่อความปลอดภัยของข้อมูลและลดภาระระบบ (บันทึกเฉพาะข้อมูลธุรกรรม)');
   };
 
   return (
@@ -90,6 +86,14 @@ export default function SlipsPage() {
             รองรับสลิปธนาคารไทยทุกแห่ง (กสิกร, ไทยพาณิชย์, กรุงไทย, กรุงเทพ, ทีทีบี, ออมสิน, พร้อมเพย์) สูงสุด 30 รูปพร้อมกัน
           </p>
         </div>
+      </div>
+
+      {/* Security & In-Memory Extraction Card */}
+      <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl px-4 py-3 flex items-center space-x-3 text-xs text-emerald-900 shadow-2xs">
+        <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+        <span>
+          <strong>ประมวลผลในหน่วยความจำโดยตรง:</strong> ระบบดึงข้อมูลจากสลิปและบันทึกเฉพาะข้อมูลธุรกรรม (Raw Extraction) โดย<strong>ไม่เก็บไฟล์ภาพสลิปบนคลาวด์</strong> ลดภาระระบบ รวดเร็ว และปลอดภัยสูงสุด
+        </span>
       </div>
 
       {/* FASTWORK-STYLE UPLOAD ZONE */}
@@ -113,7 +117,7 @@ export default function SlipsPage() {
             ลากสลิปมาวาง หรือคลิกเพื่อเลือกไฟล์
           </h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm">
-            รองรับ JPG, PNG, WEBP (สูงสุด 30 รูปต่อรอบ, ไม่จำกัดจำนวนรอบ)
+            รองรับ JPG, PNG, WEBP (สูงสุด 30 รูปต่อรอบ • ไม่เก็บไฟล์รูป ประมวลผลเร็ว)
           </p>
 
           {/* Action buttons (Camera on Mobile / File Picker) */}
@@ -316,9 +320,9 @@ export default function SlipsPage() {
                     </div>
                   </div>
 
-                  {item.slip_id && (
+                  {previews[idx] && (
                     <button
-                      onClick={() => handleViewSlipImage(item.slip_id)}
+                      onClick={() => handleViewSlipImage(idx)}
                       className="text-xs font-semibold text-slate-700 hover:text-fastwork-600 bg-white border border-slate-200 px-3.5 py-2 rounded-xl shadow-2xs hover:bg-slate-50 flex items-center space-x-1.5 self-end sm:self-center transition"
                     >
                       <Eye className="w-3.5 h-3.5" />
