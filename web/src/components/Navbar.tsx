@@ -17,6 +17,7 @@ import {
   Camera,
   ChevronRight,
   User,
+  Settings,
 } from 'lucide-react';
 import NextLink from 'next/link';
 
@@ -34,6 +35,7 @@ export const Navbar = () => {
     { href: '/transactions', label: 'รายการธุรกรรม', icon: FileSpreadsheet },
     { href: '/accounts', label: 'บัญชีของฉัน', icon: Building2 },
     { href: '/categories', label: 'หมวดหมู่', icon: Tags },
+    { href: '/settings', label: 'ตั้งค่าบัญชี', icon: Settings },
   ];
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -120,20 +122,39 @@ export const Navbar = () => {
               </a>
 
               {/* User Profile Pill */}
-              <div className="flex items-center space-x-3 border-l border-slate-200 pl-3">
-                <div className="hidden sm:flex flex-col text-right">
-                  <span className="text-xs font-bold text-slate-800 truncate max-w-[120px]">
-                    {user.display_name || user.email.split('@')[0]}
-                  </span>
-                  <span className="text-[10px] text-emerald-600 font-medium flex items-center justify-end gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    พร้อมใช้งาน
-                  </span>
-                </div>
+              <div className="flex items-center space-x-2.5 border-l border-slate-200 pl-3">
+                <NextLink
+                  href="/settings"
+                  className="flex items-center space-x-2 p-1 rounded-xl hover:bg-slate-50 transition group"
+                  title="ตั้งค่าบัญชี"
+                >
+                  <div className="hidden sm:flex flex-col text-right">
+                    <span className="text-xs font-bold text-slate-800 group-hover:text-fastwork-600 transition truncate max-w-[120px]">
+                      {user.display_name || user.email.split('@')[0]}
+                    </span>
+                    <span className="text-[10px] text-emerald-600 font-medium flex items-center justify-end gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                      พร้อมใช้งาน
+                    </span>
+                  </div>
 
-                <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-fastwork-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm">
-                  {(user.display_name || user.email).charAt(0).toUpperCase()}
-                </div>
+                  <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-fastwork-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-sm group-hover:scale-105 transition-transform">
+                    {(user.display_name || user.email).charAt(0).toUpperCase()}
+                  </div>
+                </NextLink>
+
+                {/* Settings Gear Button */}
+                <NextLink
+                  href="/settings"
+                  className={`p-2 rounded-xl transition ${
+                    pathname === '/settings'
+                      ? 'bg-fastwork-50 text-fastwork-600'
+                      : 'text-slate-400 hover:text-fastwork-600 hover:bg-slate-50'
+                  }`}
+                  title="ตั้งค่าบัญชี"
+                >
+                  <Settings className="w-4 h-4" />
+                </NextLink>
 
                 {/* Logout Button */}
                 <button

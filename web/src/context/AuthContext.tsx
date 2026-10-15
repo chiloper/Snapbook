@@ -27,7 +27,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const router = useRouter();
   const pathname = usePathname();
 
-  const isPublicPage = pathname === '/login' || pathname === '/register' || pathname === '/forgot-password';
+  const isPublicPage =
+    pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/forgot-password' ||
+    pathname?.startsWith('/reset-password');
 
   const checkAuth = async () => {
     const token = TokenStorage.getAccessToken();

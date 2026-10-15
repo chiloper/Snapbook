@@ -280,4 +280,21 @@ export class AuthService {
       message: 'เปลี่ยนรหัสผ่านสำเร็จ',
     };
   }
+
+  async resendConfirmation(email: string) {
+    try {
+      const anonClient = this.supabase.createAnonClient();
+      await anonClient.auth.resend({
+        type: 'signup',
+        email,
+      });
+    } catch (err: any) {
+      this.logger.warn(`Resend confirmation error: ${err.message}`);
+    }
+
+    return {
+      success: true,
+      message: 'หากอีเมลนี้รอการยืนยัน เราได้ส่งลิงก์ยืนยันไปยังอีเมลของคุณอีกครั้งแล้ว',
+    };
+  }
 }

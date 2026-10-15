@@ -130,4 +130,16 @@ export class AuthController {
   ) {
     return this.authService.changePassword(user.id, user.email, dto);
   }
+
+  @Public()
+  @Post('resend-confirmation')
+  @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { limit: 3, ttl: 60000 } })
+  @ApiOperation({
+    summary: 'Resend email confirmation link',
+  })
+  @ApiResponse({ status: 200, description: 'Confirmation email resent if needed' })
+  resendConfirmation(@Body() dto: ForgotPasswordDto) {
+    return this.authService.resendConfirmation(dto.email);
+  }
 }

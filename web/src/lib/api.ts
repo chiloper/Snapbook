@@ -122,6 +122,34 @@ export const authApi = {
     const res = await apiClient.get('/me');
     return res.data;
   },
+  updateProfile: async (display_name: string) => {
+    const res = await apiClient.patch('/me', { display_name });
+    const currentUser = TokenStorage.getUser();
+    if (currentUser) {
+      TokenStorage.setSession(
+        TokenStorage.getAccessToken() || '',
+        TokenStorage.getRefreshToken() || '',
+        { ...currentUser, display_name },
+      );
+    }
+    return res.data;
+  },
+  changePassword: async (current_password: string, new_password: string) => {
+    const res = await apiClient.patch('/auth/password', { current_password, new_password });
+    return res.data;
+  },
+  forgotPassword: async (email: string) => {
+    const res = await apiClient.post('/auth/forgot-password', { email });
+    return res.data;
+  },
+  resetPassword: async (access_token: string, new_password: string) => {
+    const res = await apiClient.post('/auth/reset-password', { access_token, new_password });
+    return res.data;
+  },
+  resendConfirmation: async (email: string) => {
+    const res = await apiClient.post('/auth/resend-confirmation', { email });
+    return res.data;
+  },
 };
 
 // --- Slips API ---
