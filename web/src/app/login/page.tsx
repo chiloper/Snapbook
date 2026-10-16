@@ -185,17 +185,6 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="rounded-2xl bg-indigo-50/70 p-3 border border-indigo-100 flex items-center justify-between text-xs text-indigo-900">
-          <span>เพิ่งได้รับลิงก์รีเซ็ตรหัสผ่านทางอีเมล?</span>
-          <Link
-            href="/reset-password"
-            className="font-bold text-indigo-700 hover:text-indigo-800 hover:underline inline-flex items-center gap-1 ml-2 flex-shrink-0"
-          >
-            <span>ไปตั้งรหัสใหม่</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
-        </div>
-
         <div className="text-center pt-3 border-t border-slate-100">
           <p className="text-xs sm:text-sm text-slate-500">
             ยังไม่มีบัญชีใช้งาน?{' '}

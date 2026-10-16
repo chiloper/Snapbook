@@ -27,6 +27,7 @@ function ResetPasswordForm() {
   const [showPass, setShowPass] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingToken, setCheckingToken] = useState(true);
   const [tokenMissing, setTokenMissing] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -46,6 +47,7 @@ function ResetPasswordForm() {
     } else {
       setTokenMissing(true);
     }
+    setCheckingToken(false);
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +86,51 @@ function ResetPasswordForm() {
     }
   };
 
+  if (checkingToken) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-fastwork-500" />
+      </div>
+    );
+  }
+
+  if (tokenMissing || (!accessToken && !success)) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-6 bg-white p-6 sm:p-9 rounded-3xl shadow-fastwork border border-slate-200/80 text-center">
+          <div className="mx-auto w-16 h-16 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-500">
+            <AlertCircle className="w-9 h-9" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900">
+              ลิงก์ไม่ถูกต้องหรือหมดอายุ
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 leading-relaxed">
+              ไม่สามารถเข้าถึงหน้าตั้งรหัสผ่านใหม่ได้ เนื่องจากไม่พบโทเคนยืนยันตัวตน หรือลิงก์รีเซ็ตรหัสผ่านของคุณอาจหมดอายุแล้ว
+            </p>
+          </div>
+          <div className="space-y-3 pt-2">
+            <Link
+              href="/forgot-password"
+              className="w-full inline-flex justify-center items-center py-3 px-4 rounded-2xl text-sm font-extrabold text-white bg-fastwork-500 hover:bg-fastwork-600 shadow-fastwork hover:shadow-fastwork-hover transition-all active:scale-[0.98]"
+            >
+              <span>ขอลิงก์รีเซ็ตรหัสผ่านใหม่</span>
+              <ArrowRight className="w-4 h-4 ml-1.5" />
+            </Link>
+            <div>
+              <Link
+                href="/login"
+                className="inline-block text-xs font-semibold text-slate-500 hover:text-fastwork-600 transition py-1"
+              >
+                กลับไปหน้าเข้าสู่ระบบ
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-7 bg-white p-6 sm:p-9 rounded-3xl shadow-fastwork border border-slate-200/80">
@@ -98,43 +145,6 @@ function ResetPasswordForm() {
             กำหนดรหัสผ่านใหม่สำหรับเข้าใช้งาน Snapbook
           </p>
         </div>
-
-        {tokenMissing && !accessToken && (
-          <div className="rounded-2xl bg-amber-50 p-4 border border-amber-200 space-y-3">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-amber-900 leading-relaxed">
-                ไม่พบโทเคนใน URL (หากกดลิงก์จากอีเมลแล้วเปิดผิดหน้า เช่น เด้งไปหน้า login หรือ localhost:3000 ให้คัดลอกลิงก์นั้นมาวางที่ช่องด้านล่างนี้ได้เลยครับ)
-              </div>
-            </div>
-            <div>
-              <input
-                type="text"
-                placeholder="วางลิงก์จากอีเมล หรือ Access Token ที่นี่..."
-                onChange={(e) => {
-                  const val = e.target.value.trim();
-                  if (!val) return;
-                  let extracted = val;
-                  if (val.includes('#')) {
-                    const hash = val.split('#')[1];
-                    const params = new URLSearchParams(hash);
-                    extracted = params.get('access_token') || extracted;
-                  } else if (val.includes('?')) {
-                    const query = val.split('?')[1];
-                    const params = new URLSearchParams(query);
-                    extracted = params.get('access_token') || params.get('token') || extracted;
-                  }
-                  if (extracted && extracted.length > 20) {
-                    setAccessToken(extracted);
-                    setTokenMissing(false);
-                    toast.success('ตรวจพบโทเคนเรียบร้อยแล้ว กำหนดรหัสผ่านใหม่ได้ทันที');
-                  }
-                }}
-                className="w-full text-xs px-3 py-2 bg-white border border-amber-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-amber-500/30 text-slate-800 font-mono"
-              />
-            </div>
-          </div>
-        )}
 
         {success ? (
           <div className="text-center py-4 space-y-4">
