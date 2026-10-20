@@ -32,6 +32,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('');
+  const [filterCategory, setFilterCategory] = useState<string>('');
 
   // Pagination state
   const [page, setPage] = useState(1);
@@ -66,6 +67,9 @@ export default function TransactionsPage() {
       if (filterType) {
         params.type = filterType;
       }
+      if (filterCategory) {
+        params.category_id = filterCategory;
+      }
       if (search) {
         params.search = search;
       }
@@ -94,7 +98,7 @@ export default function TransactionsPage() {
   useEffect(() => {
     setPage(1);
     fetchData(1, limit);
-  }, [activeTab, filterType]);
+  }, [activeTab, filterType, filterCategory]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,14 +299,40 @@ export default function TransactionsPage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
           </form>
 
+          {/* Type Filter */}
           <select
             value={filterType}
-            onChange={(e) => setFilterType(e.target.value)}
-            className="text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-700 font-medium focus:outline-none focus:border-fastwork-500"
+            onChange={(e) => {
+              setFilterType(e.target.value);
+              // Reset category filter if it does not match the new type
+              if (filterCategory) {
+                const currentCat = categories.find((c) => c.id === filterCategory);
+                if (currentCat && e.target.value && currentCat.type !== e.target.value) {
+                  setFilterCategory('');
+                }
+              }
+            }}
+            className="text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-700 font-medium focus:outline-none focus:border-fastwork-500 cursor-pointer"
           >
             <option value="">ทุกประเภท</option>
             <option value="expense">เฉพาะรายจ่าย (Expense)</option>
             <option value="income">เฉพาะรายรับ (Income)</option>
+          </select>
+
+          {/* Category Filter */}
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+            className="text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-700 font-medium focus:outline-none focus:border-fastwork-500 cursor-pointer"
+          >
+            <option value="">ทุกหมวดหมู่ (All Categories)</option>
+            {categories
+              .filter((c) => !filterType || c.type === filterType)
+              .map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name} ({c.type === 'income' ? 'รายรับ' : 'รายจ่าย'})
+                </option>
+              ))}
           </select>
         </div>
       </div>
