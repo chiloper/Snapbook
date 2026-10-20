@@ -164,4 +164,34 @@ xxx-x-xx456-x
       expect(result.is_bank_slip).toBe(false);
     });
   });
+
+  describe('extractTransactionRef (หมายเลขทำรายการ / รหัสอ้างอิง)', () => {
+    it('extracts reference with "หมายเลขทำรายการ" label on same line or next line', () => {
+      const template = identifyBankTemplate('ธนาคารกรุงเทพ');
+      expect(
+        extractTransactionRef('หมายเลขทำรายการ: 202610201234567890', template),
+      ).toBe('202610201234567890');
+      expect(
+        extractTransactionRef('หมายเลขทำรายการ\n014281103522BOR05412', template),
+      ).toBe('014281103522BOR05412');
+    });
+
+    it('extracts reference even when Tesseract puts spaces between Thai characters', () => {
+      const template = identifyBankTemplate('กสิกร');
+      const spacedText = 'ห ม า ย เ ล ข ท ำ ร า ย ก า ร : 014281103522BOR05412';
+      expect(extractTransactionRef(spacedText, template)).toBe('014281103522BOR05412');
+    });
+
+    it('extracts reference when OCR splits alphanumeric ref with space on same line', () => {
+      const template = identifyBankTemplate('ไทยพาณิชย์');
+      const splitRefText = 'เลขที่รายการ: 2026102012 34567890';
+      expect(extractTransactionRef(splitRefText, template)).toBe('202610201234567890');
+    });
+
+    it('falls back to 14-30 char alphanumeric slip ID when label is missing', () => {
+      const template = identifyBankTemplate('K PLUS');
+      const noLabelText = 'โอนเงินสำเร็จ\nจำนวน 500.00 บาท\n014281103522BOR05412';
+      expect(extractTransactionRef(noLabelText, template)).toBe('014281103522BOR05412');
+    });
+  });
 });

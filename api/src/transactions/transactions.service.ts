@@ -94,17 +94,19 @@ export class TransactionsService {
 
   async create(userId: string, dto: CreateTransactionDto) {
     // Check duplicate transaction_ref if provided
-    if (dto.transaction_ref) {
+    if (dto.transaction_ref && dto.transaction_ref.trim()) {
+      const normalizedRef = dto.transaction_ref.replace(/\s+/g, '').trim();
+      dto.transaction_ref = normalizedRef;
       const { data: existing } = await this.supabase
         .getClient()
         .from('transactions')
         .select('id')
         .eq('user_id', userId)
-        .eq('transaction_ref', dto.transaction_ref)
-        .maybeSingle();
+        .ilike('transaction_ref', normalizedRef)
+        .limit(1);
 
-      if (existing) {
-        throw new ConflictException('พบรายการธุรกรรมซ้ำในระบบ (รหัสอ้างอิงตรงกัน)');
+      if (existing && existing.length > 0) {
+        throw new ConflictException(`พบรายการธุรกรรมซ้ำในระบบ (หมายเลขทำรายการ: ${normalizedRef})`);
       }
     }
 

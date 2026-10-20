@@ -31,17 +31,50 @@ export default function SlipsPage() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
-    const files = Array.from(e.target.files);
-    if (files.length + selectedFiles.length > 30) {
-      toast.warning('สามารถอัปโหลดได้สูงสุด 30 รูปต่อรอบครับ');
+    const incomingFiles = Array.from(e.target.files);
+
+    // Filter out files already selected in the current queue
+    const uniqueIncoming: File[] = [];
+    let skippedDuplicateFiles = 0;
+
+    for (const file of incomingFiles) {
+      const isAlreadySelected = [...selectedFiles, ...uniqueIncoming].some(
+        (existing) =>
+          existing.name === file.name &&
+          existing.size === file.size &&
+          existing.lastModified === file.lastModified,
+      );
+      if (isAlreadySelected) {
+        skippedDuplicateFiles++;
+      } else {
+        uniqueIncoming.push(file);
+      }
+    }
+
+    if (skippedDuplicateFiles > 0) {
+      toast.warning(
+        `ข้ามไฟล์ที่เลือกซ้ำกัน ${skippedDuplicateFiles} ไฟล์ให้อัตโนมัติ`,
+        'พบไฟล์ซ้ำในรายการที่เลือก',
+      );
+    }
+
+    if (uniqueIncoming.length === 0) {
+      e.target.value = '';
       return;
     }
 
-    const newFiles = [...selectedFiles, ...files];
+    if (uniqueIncoming.length + selectedFiles.length > 30) {
+      toast.warning('สามารถอัปโหลดได้สูงสุด 30 รูปต่อรอบครับ');
+      e.target.value = '';
+      return;
+    }
+
+    const newFiles = [...selectedFiles, ...uniqueIncoming];
     setSelectedFiles(newFiles);
     const urls = newFiles.map((file) => URL.createObjectURL(file));
     setPreviews(urls);
     setResults(null);
+    e.target.value = '';
   };
 
   const handleRemoveFile = (index: number) => {
@@ -58,7 +91,19 @@ export default function SlipsPage() {
       const data = await slipsApi.uploadSlips(selectedFiles);
       setResults(data);
       const createdCount = data.filter((d: any) => d.result === 'created').length;
-      if (createdCount > 0) {
+      const duplicateCount = data.filter((d: any) => d.result === 'duplicate').length;
+
+      if (createdCount > 0 && duplicateCount > 0) {
+        toast.warning(
+          `บันทึกสำเร็จ ${createdCount} รายการ และพบสลิปซ้ำ ${duplicateCount} รายการ (ข้ามการบันทึกซ้ำให้อัตโนมัติ)`,
+          'ตรวจพบสลิปซ้ำบางรายการ',
+        );
+      } else if (duplicateCount > 0 && createdCount === 0) {
+        toast.warning(
+          `พบสลิปซ้ำในระบบ ${duplicateCount} รายการ ระบบป้องกันการบันทึกซ้ำให้เรียบร้อยแล้ว`,
+          'สลิปนี้มีในระบบแล้ว',
+        );
+      } else if (createdCount > 0) {
         toast.success(`บันทึกสลิปสำเร็จ ${createdCount} รายการ`, 'สแกนสลิปสำเร็จ');
       } else {
         toast.info('ประมวลผลสลิปเรียบร้อยแล้ว โปรดตรวจสอบผลลัพธ์ด้านล่าง');
@@ -319,15 +364,29 @@ export default function SlipsPage() {
                       </div>
 
                       {isCreated && item.transaction && (
-                        <p className="text-xs text-slate-600 mt-1 font-medium">
-                          {item.transaction.bank_name || 'ธนาคาร'} | ยอดเงิน: <span className="font-bold text-slate-900">฿{Number(item.transaction.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span> | คู่โอน: {item.transaction.counterparty_name || '-'}
-                        </p>
+                        <div className="text-xs text-slate-600 mt-1 font-medium space-y-0.5">
+                          <p>
+                            {item.transaction.bank_name || 'ธนาคาร'} | ยอดเงิน: <span className="font-bold text-slate-900">฿{Number(item.transaction.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })}</span> | คู่โอน: {item.transaction.counterparty_name || '-'}
+                          </p>
+                          {(item.transaction_ref || item.transaction.transaction_ref) && (
+                            <p className="text-[11px] text-slate-400 font-mono">
+                              หมายเลขทำรายการ: {item.transaction_ref || item.transaction.transaction_ref}
+                            </p>
+                          )}
+                        </div>
                       )}
 
                       {!isCreated && item.message && (
-                        <p className="text-xs text-slate-500 mt-0.5">
-                          {item.message}
-                        </p>
+                        <div className="mt-0.5 space-y-0.5">
+                          <p className={`text-xs ${isDuplicate ? 'text-amber-800 font-medium' : 'text-slate-500'}`}>
+                            {item.message}
+                          </p>
+                          {isDuplicate && item.transaction && (
+                            <p className="text-[11px] text-slate-500">
+                              รายการเดิมในระบบ: {item.transaction.bank_name || 'ธนาคาร'} | ยอดเงิน ฿{Number(item.transaction.amount).toLocaleString('th-TH', { minimumFractionDigits: 2 })} | คู่โอน: {item.transaction.counterparty_name || '-'}
+                            </p>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

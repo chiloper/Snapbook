@@ -14,6 +14,22 @@ export interface BankTemplate {
   memoAnchorKeywords: string[];
 }
 
+export const COMMON_REF_ANCHORS = [
+  'หมายเลขทำรายการ',
+  'เลขที่ทำรายการ',
+  'รหัสทำรายการ',
+  'หมายเลขอ้างอิง',
+  'เลขที่รายการ',
+  'รหัสอ้างอิง',
+  'เลขที่อ้างอิง',
+  'รหัสรายการ',
+  'transaction id',
+  'transaction ref',
+  'ref no',
+  'ref.',
+  'ref',
+];
+
 export const BANK_TEMPLATES: BankTemplate[] = [
   {
     id: 'kbank',
@@ -23,7 +39,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'ผู้รับเงิน', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'จำนวน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'transaction id', 'ref no', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo', 'note'],
   },
@@ -35,7 +51,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['เลขที่รายการ', 'รหัสอ้างอิง', 'ref no', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -47,7 +63,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่อ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -59,7 +75,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ถึง', 'ไปยัง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -71,7 +87,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -83,7 +99,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ถึง', 'ไปยัง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['เลขที่อ้างอิง', 'รหัสอ้างอิง', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -95,7 +111,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -107,7 +123,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -119,7 +135,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['หมายเลขอ้างอิง', 'รหัสอ้างอิง', 'transaction id', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['ข้อความ', 'บันทึก', 'memo'],
   },
@@ -131,7 +147,7 @@ export const BANK_TEMPLATES: BankTemplate[] = [
     senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
     receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'to'],
     amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'amount'],
-    refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'ref'],
+    refAnchorKeywords: COMMON_REF_ANCHORS,
     feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
     memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo'],
   },
@@ -145,19 +161,34 @@ export const GENERIC_TEMPLATE: BankTemplate = {
   senderAnchorKeywords: ['จาก', 'ผู้โอน', 'from'],
   receiverAnchorKeywords: ['ไปยัง', 'ถึง', 'ผู้รับ', 'ผู้รับเงิน', 'to'],
   amountAnchorKeywords: ['จำนวนเงิน', 'ยอดเงิน', 'จำนวน', 'amount'],
-  refAnchorKeywords: ['รหัสอ้างอิง', 'เลขที่รายการ', 'เลขที่อ้างอิง', 'transaction id', 'ref'],
+  refAnchorKeywords: COMMON_REF_ANCHORS,
   feeAnchorKeywords: ['ค่าธรรมเนียม', 'fee'],
   memoAnchorKeywords: ['บันทึกช่วยจำ', 'บันทึก', 'memo', 'note'],
 };
 
 /**
+ * Collapses spaces between Thai characters caused by Tesseract OCR.
+ * Example: "ห ม า ย เ ล ข ท ำ ร า ย ก า ร" -> "หมายเลขทำรายการ"
+ */
+export function collapseThaiSpaces(str: string): string {
+  if (!str) return '';
+  let prev = str;
+  let curr = str.replace(/([\u0E00-\u0E7F])\s+(?=[\u0E00-\u0E7F])/g, '$1');
+  while (curr !== prev) {
+    prev = curr;
+    curr = curr.replace(/([\u0E00-\u0E7F])\s+(?=[\u0E00-\u0E7F])/g, '$1');
+  }
+  return curr;
+}
+
+/**
  * Identifies which bank template matches the OCR text.
  */
 export function identifyBankTemplate(text: string): BankTemplate {
-  const lower = text.toLowerCase();
+  const lower = collapseThaiSpaces(text).toLowerCase();
   for (const template of BANK_TEMPLATES) {
     for (const kw of template.triggerKeywords) {
-      if (lower.includes(kw)) {
+      if (lower.includes(collapseThaiSpaces(kw).toLowerCase())) {
         return template;
       }
     }
@@ -292,38 +323,99 @@ export function extractFee(text: string, template: BankTemplate): number {
 }
 
 /**
- * Extracts transaction reference / slip ID.
+ * Helper to extract a valid reference code from a text segment (after stripping anchor labels).
+ */
+function parseRefCandidateFromSegment(segment: string): string {
+  if (!segment) return '';
+
+  // Remove Thai characters and English anchor labels
+  const cleaned = segment
+    .replace(/[\u0E00-\u0E7F]+/g, ' ')
+    .replace(/\b(?:transaction\s*id|transaction\s*ref|ref\s*no\.?|ref\.?|no\.?)\b/gi, ' ')
+    .replace(/[:.#]/g, ' ')
+    .trim();
+
+  if (!cleaned) return '';
+
+  // 1. Check if OCR split the reference code with spaces on the reference line (e.g., "0142811035 22BOR05412" or "2026102012 34567890")
+  const tokens = cleaned.match(/[A-Za-z0-9_-]+/g);
+  if (tokens && tokens.length >= 2) {
+    const joined = tokens.join('');
+    const digitCount = (joined.match(/\d/g) || []).length;
+    if (joined.length >= 8 && joined.length <= 35 && digitCount >= 5 && !/[xX]{2,}/.test(joined)) {
+      return joined;
+    }
+  }
+
+  // 2. Check for a single contiguous alphanumeric token (8-35 chars, >=3 digits, not masked account)
+  const singleMatch = cleaned.match(/\b([A-Za-z0-9_-]{8,35})\b/g);
+  if (singleMatch) {
+    for (const token of singleMatch) {
+      const digitCount = (token.match(/\d/g) || []).length;
+      if (digitCount >= 3 && !/[xX]{2,}/.test(token)) {
+        return token.trim();
+      }
+    }
+  }
+
+  return '';
+}
+
+/**
+ * Extracts transaction reference / slip ID (หมายเลขทำรายการ / รหัสอ้างอิง / เลขที่รายการ).
  */
 export function extractTransactionRef(text: string, template: BankTemplate): string {
   const lines = text.split('\n').map(cleanLine).filter(Boolean);
+  const allAnchors = Array.from(new Set([...template.refAnchorKeywords, ...COMMON_REF_ANCHORS]));
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-    const hasRefAnchor = template.refAnchorKeywords.some((k) =>
-      line.toLowerCase().includes(k.toLowerCase()),
+    const rawLine = lines[i];
+    const collapsedLine = collapseThaiSpaces(rawLine);
+    const lowerCollapsed = collapsedLine.toLowerCase();
+
+    const matchedAnchor = allAnchors.find((k) =>
+      lowerCollapsed.includes(collapseThaiSpaces(k).toLowerCase()),
     );
 
-    if (hasRefAnchor) {
-      // Match alphanumeric code on same line
-      const matchSameLine = line.match(/(?:[:\s]|^)([A-Za-z0-9_-]{8,35})/);
-      if (matchSameLine && !template.refAnchorKeywords.some((k) => k === matchSameLine[1].toLowerCase())) {
-        return matchSameLine[1].trim();
+    if (matchedAnchor) {
+      const normalizedAnchor = collapseThaiSpaces(matchedAnchor).toLowerCase();
+      const idx = lowerCollapsed.indexOf(normalizedAnchor);
+      const afterAnchor = idx !== -1
+        ? collapsedLine.substring(idx + normalizedAnchor.length)
+        : collapsedLine;
+
+      // 1. Try same line after the anchor keyword
+      const sameLineRef = parseRefCandidateFromSegment(afterAnchor);
+      if (sameLineRef) {
+        return sameLineRef;
       }
-      // Check next line
-      if (i + 1 < lines.length) {
-        const nextLine = lines[i + 1].trim();
-        const matchNext = nextLine.match(/^[A-Za-z0-9_-]{8,35}$/);
-        if (matchNext) {
-          return matchNext[0];
+
+      // 2. Try next line (and i + 2 if i + 1 was empty/noise)
+      for (let offset = 1; offset <= 2 && i + offset < lines.length; offset++) {
+        const nextLine = collapseThaiSpaces(lines[i + offset]);
+        // Stop if next line is another known field anchor (like memo/fee)
+        const isOtherAnchor =
+          template.memoAnchorKeywords.some((k) => nextLine.toLowerCase().includes(k.toLowerCase())) ||
+          template.feeAnchorKeywords.some((k) => nextLine.toLowerCase().includes(k.toLowerCase()));
+        if (isOtherAnchor) break;
+
+        const nextLineRef = parseRefCandidateFromSegment(nextLine);
+        if (nextLineRef) {
+          return nextLineRef;
         }
       }
     }
   }
 
-  // Fallback: look for 16-25 digit reference numbers (standard for Thai bank slips)
-  const longRef = text.match(/\b\d{16,25}\b/);
-  if (longRef) {
-    return longRef[0];
+  // Fallback 1: look for 15-30 char alphanumeric/digit reference strings (e.g. KBank 014281103522BOR05412 or 16-25 digit refs)
+  const allCandidates = text.match(/\b[A-Za-z0-9]{14,30}\b/g);
+  if (allCandidates) {
+    for (const candidate of allCandidates) {
+      const digitCount = (candidate.match(/\d/g) || []).length;
+      if (digitCount >= 6 && !/[xX]{2,}/.test(candidate)) {
+        return candidate;
+      }
+    }
   }
 
   return '';
@@ -498,11 +590,16 @@ export function parseSlipWithTemplates(rawText: string): RawSlipExtraction {
   const template = identifyBankTemplate(rawText);
 
   // 2. Check is_bank_slip
-  const lower = rawText.toLowerCase();
-  const hasStatusKeyword = template.statusKeywords.some((k) => lower.includes(k.toLowerCase()));
-  const hasBankTrigger = template.triggerKeywords.some((k) => lower.includes(k.toLowerCase()));
-  const hasAmountOrRef = template.amountAnchorKeywords.some((k) => lower.includes(k.toLowerCase())) ||
-    template.refAnchorKeywords.some((k) => lower.includes(k.toLowerCase()));
+  const lower = collapseThaiSpaces(rawText).toLowerCase();
+  const hasStatusKeyword = template.statusKeywords.some((k) =>
+    lower.includes(collapseThaiSpaces(k).toLowerCase()),
+  );
+  const hasBankTrigger = template.triggerKeywords.some((k) =>
+    lower.includes(collapseThaiSpaces(k).toLowerCase()),
+  );
+  const hasAmountOrRef =
+    template.amountAnchorKeywords.some((k) => lower.includes(collapseThaiSpaces(k).toLowerCase())) ||
+    template.refAnchorKeywords.some((k) => lower.includes(collapseThaiSpaces(k).toLowerCase()));
 
   const isBankSlip = hasStatusKeyword || (hasBankTrigger && hasAmountOrRef);
 

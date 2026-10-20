@@ -4,7 +4,7 @@ import {
   NotFoundException,
   Logger,
 } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { createHash } from 'crypto';
 import { SupabaseService } from '../supabase/supabase.service';
 import {
   ISlipExtractor,
@@ -19,6 +19,7 @@ export interface SlipProcessingItemResult {
   file_name: string;
   result: 'created' | 'duplicate' | 'failed';
   transaction?: any;
+  transaction_ref?: string;
   slip_id?: string;
   message?: string;
   needs_type_review?: boolean;
@@ -42,11 +43,25 @@ export class SlipsService {
   ): Promise<SlipProcessingItemResult[]> {
     const results: SlipProcessingItemResult[] = [];
     const ownAccounts = await this.ownAccountsService.findAll(userId);
+    const seenRefsInBatch = new Set<string>();
+    const seenHashesInBatch = new Set<string>();
 
     for (const file of files) {
       const fileName = file.originalname || 'slip.jpg';
 
       try {
+        const fileHash = createHash('sha256').update(file.buffer).digest('hex');
+
+        // Fast check: exact same image file uploaded multiple times in the same request batch
+        if (seenHashesInBatch.has(fileHash)) {
+          results.push({
+            file_name: fileName,
+            result: 'duplicate',
+            message: 'ไฟล์สลิปนี้ซ้ำกับไฟล์อื่นในรอบอัปโหลดเดียวกัน',
+          });
+          continue;
+        }
+
         // 1. Insert initial slip record with status 'processing'
         // Note: Do not upload slip images to Supabase Storage to prevent upload failures
         // and reduce system load. We process in-memory and save raw_extraction and transactions.
@@ -78,6 +93,12 @@ export class SlipsService {
           file.buffer,
           file.mimetype,
         );
+
+        const normalizedRef = extraction.transaction_ref
+          ? extraction.transaction_ref.replace(/\s+/g, '').trim()
+          : '';
+        extraction.transaction_ref = normalizedRef;
+        (extraction as any).file_hash = fileHash;
 
         // 5. Validation check: extraction errors, is_bank_slip & amount
         if (extraction.error) {
@@ -143,18 +164,38 @@ export class SlipsService {
           }
         }
 
-        // 9. Check duplicate transaction_ref (per user)
-        if (extraction.transaction_ref) {
-          const { data: duplicateTx } = await this.supabase
+        // 9. Check duplicate slip (by transaction_ref / หมายเลขทำรายการ, batch, or file_hash)
+        if (normalizedRef && seenRefsInBatch.has(normalizedRef.toUpperCase())) {
+          await this.supabase
+            .getClient()
+            .from('slips')
+            .update({
+              status: 'extracted',
+              raw_extraction: extraction,
+            })
+            .eq('user_id', userId)
+            .eq('id', slipId);
+
+          results.push({
+            file_name: fileName,
+            result: 'duplicate',
+            transaction_ref: normalizedRef,
+            slip_id: slipId,
+            message: `สลิปซ้ำในรอบอัปโหลดเดียวกัน (หมายเลขทำรายการ: ${normalizedRef})`,
+          });
+          continue;
+        }
+
+        if (normalizedRef) {
+          const { data: duplicateTxs } = await this.supabase
             .getClient()
             .from('transactions')
-            .select('id, transaction_ref')
+            .select('id, transaction_ref, amount, bank_name, counterparty_name, transaction_at')
             .eq('user_id', userId)
-            .eq('transaction_ref', extraction.transaction_ref)
-            .maybeSingle();
+            .ilike('transaction_ref', normalizedRef)
+            .limit(1);
 
-          if (duplicateTx) {
-            // Update slip as duplicate/extracted
+          if (duplicateTxs && duplicateTxs.length > 0) {
             await this.supabase
               .getClient()
               .from('slips')
@@ -168,10 +209,54 @@ export class SlipsService {
             results.push({
               file_name: fileName,
               result: 'duplicate',
+              transaction: duplicateTxs[0],
+              transaction_ref: normalizedRef,
               slip_id: slipId,
-              message: 'สลิปนี้ถูกบันทึกในระบบแล้ว (รหัสอ้างอิงตรงกัน)',
+              message: `สลิปนี้ถูกบันทึกในระบบแล้ว (หมายเลขทำรายการ: ${normalizedRef})`,
             });
             continue;
+          }
+        } else {
+          // Fallback when OCR could not read transaction_ref: check if identical image file_hash was already saved
+          const { data: prevSlips } = await this.supabase
+            .getClient()
+            .from('slips')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('status', 'extracted')
+            .neq('id', slipId)
+            .contains('raw_extraction', { file_hash: fileHash })
+            .limit(1);
+
+          if (prevSlips && prevSlips.length > 0) {
+            const { data: linkedTxs } = await this.supabase
+              .getClient()
+              .from('transactions')
+              .select('id, transaction_ref, amount, bank_name, counterparty_name, transaction_at')
+              .eq('user_id', userId)
+              .eq('slip_id', prevSlips[0].id)
+              .limit(1);
+
+            if (linkedTxs && linkedTxs.length > 0) {
+              await this.supabase
+                .getClient()
+                .from('slips')
+                .update({
+                  status: 'extracted',
+                  raw_extraction: extraction,
+                })
+                .eq('user_id', userId)
+                .eq('id', slipId);
+
+              results.push({
+                file_name: fileName,
+                result: 'duplicate',
+                transaction: linkedTxs[0],
+                slip_id: slipId,
+                message: 'สลิปนี้ถูกบันทึกในระบบแล้ว (ตรวจพบไฟล์ภาพสลิปเดียวกัน)',
+              });
+              continue;
+            }
           }
         }
 
@@ -189,7 +274,7 @@ export class SlipsService {
             bank_name: extraction.bank_name || null,
             counterparty_name: counterpartyName || null,
             counterparty_account: counterpartyAccount || null,
-            transaction_ref: extraction.transaction_ref || null,
+            transaction_ref: normalizedRef || null,
             category_id: categoryId,
             note: extraction.memo || null,
             status: 'pending_review',
@@ -203,8 +288,9 @@ export class SlipsService {
             results.push({
               file_name: fileName,
               result: 'duplicate',
+              transaction_ref: normalizedRef || undefined,
               slip_id: slipId,
-              message: 'สลิปนี้ถูกบันทึกในระบบแล้ว (รหัสอ้างอิงตรงกัน)',
+              message: `สลิปนี้ถูกบันทึกในระบบแล้ว${normalizedRef ? ` (หมายเลขทำรายการ: ${normalizedRef})` : ' (รหัสอ้างอิงตรงกัน)'}`,
             });
             continue;
           }
@@ -217,6 +303,11 @@ export class SlipsService {
             message: 'ไม่สามารถบันทึกรายการธุรกรรมได้',
           });
           continue;
+        }
+
+        seenHashesInBatch.add(fileHash);
+        if (normalizedRef) {
+          seenRefsInBatch.add(normalizedRef.toUpperCase());
         }
 
         // 11. Mark slip as extracted successfully
@@ -234,6 +325,7 @@ export class SlipsService {
           file_name: fileName,
           result: 'created',
           transaction: newTx,
+          transaction_ref: normalizedRef || undefined,
           slip_id: slipId,
           needs_type_review: typeDetection.needs_type_review,
         });

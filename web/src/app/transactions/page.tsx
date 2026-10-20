@@ -339,6 +339,14 @@ export default function TransactionsPage() {
                         <span className="font-medium text-slate-600">{tx.bank_name || 'ธนาคาร'}</span>
                         <span>•</span>
                         <span>{new Date(tx.transaction_at).toLocaleDateString('th-TH')}</span>
+                        {tx.transaction_ref && (
+                          <>
+                            <span>•</span>
+                            <span className="font-mono text-[11px] text-slate-400">
+                              เลขรายการ: {tx.transaction_ref}
+                            </span>
+                          </>
+                        )}
                         {Number(tx.fee) > 0 && (
                           <>
                             <span>•</span>
