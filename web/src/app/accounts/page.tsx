@@ -170,7 +170,8 @@ export default function AccountsPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <>
+      <div className="max-w-4xl mx-auto space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
@@ -283,10 +284,11 @@ export default function AccountsPage() {
           })}
         </div>
       )}
+      </div>
 
       {/* Create Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div className="fixed inset-0 !m-0 z-[100] bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-white rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-in fade-in slide-in-from-bottom sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
               <h3 className="text-lg font-extrabold text-slate-900">
@@ -374,6 +376,6 @@ export default function AccountsPage() {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 }
