@@ -322,181 +322,8 @@ export default function TransactionsPage() {
             <p className="font-semibold text-slate-600">ไม่พบรายการธุรกรรม</p>
             <p className="text-xs text-slate-400">อัปโหลดสลิปธนาคารหรือบันทึกรายการเพื่อเริ่มต้น</p>
           </div>
-        ) : activeTab === 'all' ? (
-          /* Table View for ALL Transactions */
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 whitespace-nowrap">วัน-เวลา</th>
-                  <th className="py-3.5 px-3 whitespace-nowrap">ประเภท</th>
-                  <th className="py-3.5 px-4 whitespace-nowrap">รายการ / คู่โอน</th>
-                  <th className="py-3.5 px-3 whitespace-nowrap">หมวดหมู่</th>
-                  <th className="py-3.5 px-3 whitespace-nowrap">ธนาคาร / รหัสรายการ</th>
-                  <th className="py-3.5 px-4 text-right whitespace-nowrap">ยอดเงิน</th>
-                  <th className="py-3.5 px-3 text-center whitespace-nowrap">สถานะ</th>
-                  <th className="py-3.5 px-4 text-center whitespace-nowrap">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {transactions.map((tx) => {
-                  const isIncome = tx.type === 'income';
-                  const isPending = tx.status === 'pending_review';
-
-                  return (
-                    <tr
-                      key={tx.id}
-                      className="hover:bg-slate-50/80 transition-colors group"
-                    >
-                      {/* Date & Time */}
-                      <td className="py-3.5 px-4 whitespace-nowrap">
-                        <div className="font-semibold text-slate-800">
-                          {new Date(tx.transaction_at).toLocaleDateString('th-TH', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                          })}
-                        </div>
-                        <div className="text-[11px] text-slate-400">
-                          {new Date(tx.transaction_at).toLocaleTimeString('th-TH', {
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })} น.
-                        </div>
-                      </td>
-
-                      {/* Type Badge */}
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold ${
-                            isIncome
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200/60'
-                          }`}
-                        >
-                          {isIncome ? (
-                            <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-600" />
-                          ) : (
-                            <ArrowUpRight className="w-3.5 h-3.5 text-rose-600" />
-                          )}
-                          <span>{isIncome ? 'รายรับ' : 'รายจ่าย'}</span>
-                        </span>
-                      </td>
-
-                      {/* Title / Counterparty / Memo */}
-                      <td className="py-3.5 px-4 max-w-[220px]">
-                        <div className="font-bold text-slate-900 truncate" title={tx.counterparty_name}>
-                          {tx.counterparty_name || (isIncome ? 'เงินโอนเข้า' : 'โอนเงิน')}
-                        </div>
-                        {tx.note && (
-                          <div className="text-[11px] text-slate-500 truncate" title={tx.note}>
-                            {tx.note}
-                          </div>
-                        )}
-                        {tx.counterparty_account && !tx.note && (
-                          <div className="text-[11px] text-slate-400 font-mono">
-                            {tx.counterparty_account}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Category */}
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        {tx.category ? (
-                          <span
-                            className="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold max-w-[140px] truncate"
-                            style={{
-                              backgroundColor: `${tx.category.color}15`,
-                              color: tx.category.color,
-                            }}
-                          >
-                            {tx.category.name}
-                          </span>
-                        ) : (
-                          <span className="text-slate-300 text-xs">-</span>
-                        )}
-                      </td>
-
-                      {/* Bank & Ref */}
-                      <td className="py-3.5 px-3 whitespace-nowrap">
-                        <div className="font-medium text-slate-700">
-                          {tx.bank_name || '-'}
-                        </div>
-                        {tx.transaction_ref && (
-                          <div className="text-[11px] font-mono text-slate-400 truncate max-w-[150px]" title={tx.transaction_ref}>
-                            {tx.transaction_ref}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Amount */}
-                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
-                        <div
-                          className={`text-sm sm:text-base font-extrabold tracking-tight ${
-                            isIncome ? 'text-emerald-600' : 'text-slate-900'
-                          }`}
-                        >
-                          {isIncome ? '+' : '-'}฿
-                          {Number(tx.amount).toLocaleString('th-TH', {
-                            minimumFractionDigits: 2,
-                          })}
-                        </div>
-                        {Number(tx.fee) > 0 && (
-                          <div className="text-[10px] text-slate-400">
-                            ธรรมเนียม ฿{Number(tx.fee).toFixed(2)}
-                          </div>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="py-3.5 px-3 text-center whitespace-nowrap">
-                        {isPending ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                            รอตรวจสอบ
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
-                            ยืนยันแล้ว
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Actions */}
-                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
-                        <div className="inline-flex items-center space-x-1">
-                          {isPending && (
-                            <button
-                              onClick={() => handleConfirmSingle(tx)}
-                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                              title="ยืนยันรายการ"
-                            >
-                              <Check className="w-4 h-4" />
-                            </button>
-                          )}
-                          <button
-                            onClick={() => setEditingTx(tx)}
-                            className="p-1.5 text-slate-400 hover:text-fastwork-600 hover:bg-fastwork-50 rounded-lg transition"
-                            title="แก้ไขข้อมูล"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(tx.id)}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
-                            title="ลบรายการ"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
         ) : (
-          /* List Card View for Pending Review */
+          /* Card / List View for Transactions */
           <div className="divide-y divide-slate-100">
             {transactions.map((tx) => {
               const isIncome = tx.type === 'income';
@@ -526,9 +353,13 @@ export default function TransactionsPage() {
                         <span className="font-bold text-slate-900 text-sm truncate">
                           {tx.counterparty_name || (isIncome ? 'เงินโอนเข้า' : 'โอนเงิน')}
                         </span>
-                        {isPending && (
+                        {isPending ? (
                           <span className="text-[10px] bg-amber-50 text-amber-700 border border-amber-200 font-bold px-2 py-0.5 rounded-full flex-shrink-0">
                             รอตรวจสอบ
+                          </span>
+                        ) : (
+                          <span className="text-[10px] bg-emerald-50 text-emerald-700 border border-emerald-200/60 font-bold px-2 py-0.5 rounded-full flex-shrink-0">
+                            ยืนยันแล้ว
                           </span>
                         )}
                         {tx.category && (
