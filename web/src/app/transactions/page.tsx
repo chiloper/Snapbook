@@ -21,16 +21,24 @@ import {
   CreditCard,
   Building2,
   ChevronRight,
+  ChevronLeft,
 } from 'lucide-react';
 
 export default function TransactionsPage() {
   const { toast, confirm } = useAlert();
-  const [activeTab, setActiveTab] = useState<'pending' | 'all'>('pending');
+  const [activeTab, setActiveTab] = useState<'pending' | 'all'>('all');
   const [transactions, setTransactions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState<string>('');
+
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
 
   // Modals
   const [editingTx, setEditingTx] = useState<any | null>(null);
@@ -45,11 +53,12 @@ export default function TransactionsPage() {
     note: '',
   });
 
-  const fetchData = async () => {
+  const fetchData = async (targetPage = page, targetLimit = limit) => {
     setLoading(true);
     try {
       const params: Record<string, any> = {
-        limit: 50,
+        page: targetPage,
+        limit: targetLimit,
       };
       if (activeTab === 'pending') {
         params.status = 'pending_review';
@@ -61,13 +70,20 @@ export default function TransactionsPage() {
         params.search = search;
       }
 
-      const [txRes, catRes] = await Promise.all([
+      const [txRes, catRes, pendingRes] = await Promise.all([
         transactionsApi.getAll(params),
         categoriesApi.getAll(),
+        transactionsApi.getAll({ status: 'pending_review', limit: 1 }),
       ]);
 
       setTransactions(txRes.data || []);
+      setTotal(txRes.total || 0);
+      setTotalPages(txRes.totalPages || 1);
+      setPage(txRes.page || targetPage);
       setCategories(catRes || []);
+      if (pendingRes && typeof pendingRes.total === 'number') {
+        setPendingCount(pendingRes.total);
+      }
     } catch (err) {
       console.error('Failed to load transactions:', err);
     } finally {
@@ -76,12 +92,26 @@ export default function TransactionsPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    setPage(1);
+    fetchData(1, limit);
   }, [activeTab, filterType]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchData();
+    setPage(1);
+    fetchData(1, limit);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || newPage === page) return;
+    setPage(newPage);
+    fetchData(newPage, limit);
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+    fetchData(1, newLimit);
   };
 
   const handleConfirmBulk = async () => {
@@ -102,7 +132,7 @@ export default function TransactionsPage() {
     try {
       await transactionsApi.confirmBulk(pendingIds);
       toast.success(`ยืนยันรายการสำเร็จ ${pendingIds.length} รายการ`);
-      fetchData();
+      fetchData(1, limit);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการยืนยันรายการ');
     }
@@ -112,7 +142,7 @@ export default function TransactionsPage() {
     try {
       await transactionsApi.update(tx.id, { status: 'confirmed' });
       toast.success('ยืนยันรายการเรียบร้อยแล้ว');
-      fetchData();
+      fetchData(page, limit);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'ไม่สามารถยืนยันรายการได้');
     }
@@ -129,8 +159,8 @@ export default function TransactionsPage() {
 
     try {
       await transactionsApi.delete(id);
-      setTransactions((prev) => prev.filter((t) => t.id !== id));
       toast.success('ลบรายการเรียบร้อยแล้ว');
+      fetchData(page, limit);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'ไม่สามารถลบรายการได้');
     }
@@ -151,7 +181,7 @@ export default function TransactionsPage() {
       });
       setEditingTx(null);
       toast.success('บันทึกการแก้ไขเรียบร้อยแล้ว');
-      fetchData();
+      fetchData(page, limit);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'เกิดข้อผิดพลาดในการแก้ไขรายการ');
     }
@@ -180,7 +210,7 @@ export default function TransactionsPage() {
         note: '',
       });
       toast.success('บันทึกรายการสำเร็จ');
-      fetchData();
+      fetchData(1, limit);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'ไม่สามารถสร้างรายการได้');
     }
@@ -214,16 +244,6 @@ export default function TransactionsPage() {
           {/* Fastwork Pill Tabs */}
           <div className="flex bg-slate-100 p-1 rounded-2xl w-full sm:w-auto">
             <button
-              onClick={() => setActiveTab('pending')}
-              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-                activeTab === 'pending'
-                  ? 'bg-white text-fastwork-600 shadow-sm'
-                  : 'text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              รอตรวจสอบ (Pending)
-            </button>
-            <button
               onClick={() => setActiveTab('all')}
               className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 activeTab === 'all'
@@ -232,6 +252,21 @@ export default function TransactionsPage() {
               }`}
             >
               ทั้งหมด (All)
+            </button>
+            <button
+              onClick={() => setActiveTab('pending')}
+              className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-1.5 ${
+                activeTab === 'pending'
+                  ? 'bg-white text-fastwork-600 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <span>รอตรวจสอบ (Pending)</span>
+              {typeof pendingCount === 'number' && pendingCount > 0 && (
+                <span className="text-[10px] px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded-full font-extrabold">
+                  {pendingCount}
+                </span>
+              )}
             </button>
           </div>
 
@@ -272,7 +307,7 @@ export default function TransactionsPage() {
         </div>
       </div>
 
-      {/* Transactions List */}
+      {/* Transactions Container */}
       <div className="bg-white rounded-3xl border border-slate-200/80 shadow-fastwork-sm overflow-hidden">
         {loading ? (
           <div className="py-16 text-center space-y-2">
@@ -287,7 +322,181 @@ export default function TransactionsPage() {
             <p className="font-semibold text-slate-600">ไม่พบรายการธุรกรรม</p>
             <p className="text-xs text-slate-400">อัปโหลดสลิปธนาคารหรือบันทึกรายการเพื่อเริ่มต้น</p>
           </div>
+        ) : activeTab === 'all' ? (
+          /* Table View for ALL Transactions */
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs sm:text-sm border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-200/80 text-[11px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">
+                  <th className="py-3.5 px-4 whitespace-nowrap">วัน-เวลา</th>
+                  <th className="py-3.5 px-3 whitespace-nowrap">ประเภท</th>
+                  <th className="py-3.5 px-4 whitespace-nowrap">รายการ / คู่โอน</th>
+                  <th className="py-3.5 px-3 whitespace-nowrap">หมวดหมู่</th>
+                  <th className="py-3.5 px-3 whitespace-nowrap">ธนาคาร / รหัสรายการ</th>
+                  <th className="py-3.5 px-4 text-right whitespace-nowrap">ยอดเงิน</th>
+                  <th className="py-3.5 px-3 text-center whitespace-nowrap">สถานะ</th>
+                  <th className="py-3.5 px-4 text-center whitespace-nowrap">จัดการ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {transactions.map((tx) => {
+                  const isIncome = tx.type === 'income';
+                  const isPending = tx.status === 'pending_review';
+
+                  return (
+                    <tr
+                      key={tx.id}
+                      className="hover:bg-slate-50/80 transition-colors group"
+                    >
+                      {/* Date & Time */}
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <div className="font-semibold text-slate-800">
+                          {new Date(tx.transaction_at).toLocaleDateString('th-TH', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          {new Date(tx.transaction_at).toLocaleTimeString('th-TH', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })} น.
+                        </div>
+                      </td>
+
+                      {/* Type Badge */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <span
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-xl text-xs font-bold ${
+                            isIncome
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                              : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                          }`}
+                        >
+                          {isIncome ? (
+                            <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-600" />
+                          ) : (
+                            <ArrowUpRight className="w-3.5 h-3.5 text-rose-600" />
+                          )}
+                          <span>{isIncome ? 'รายรับ' : 'รายจ่าย'}</span>
+                        </span>
+                      </td>
+
+                      {/* Title / Counterparty / Memo */}
+                      <td className="py-3.5 px-4 max-w-[220px]">
+                        <div className="font-bold text-slate-900 truncate" title={tx.counterparty_name}>
+                          {tx.counterparty_name || (isIncome ? 'เงินโอนเข้า' : 'โอนเงิน')}
+                        </div>
+                        {tx.note && (
+                          <div className="text-[11px] text-slate-500 truncate" title={tx.note}>
+                            {tx.note}
+                          </div>
+                        )}
+                        {tx.counterparty_account && !tx.note && (
+                          <div className="text-[11px] text-slate-400 font-mono">
+                            {tx.counterparty_account}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Category */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        {tx.category ? (
+                          <span
+                            className="inline-block px-2.5 py-1 rounded-lg text-xs font-semibold max-w-[140px] truncate"
+                            style={{
+                              backgroundColor: `${tx.category.color}15`,
+                              color: tx.category.color,
+                            }}
+                          >
+                            {tx.category.name}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-xs">-</span>
+                        )}
+                      </td>
+
+                      {/* Bank & Ref */}
+                      <td className="py-3.5 px-3 whitespace-nowrap">
+                        <div className="font-medium text-slate-700">
+                          {tx.bank_name || '-'}
+                        </div>
+                        {tx.transaction_ref && (
+                          <div className="text-[11px] font-mono text-slate-400 truncate max-w-[150px]" title={tx.transaction_ref}>
+                            {tx.transaction_ref}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Amount */}
+                      <td className="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div
+                          className={`text-sm sm:text-base font-extrabold tracking-tight ${
+                            isIncome ? 'text-emerald-600' : 'text-slate-900'
+                          }`}
+                        >
+                          {isIncome ? '+' : '-'}฿
+                          {Number(tx.amount).toLocaleString('th-TH', {
+                            minimumFractionDigits: 2,
+                          })}
+                        </div>
+                        {Number(tx.fee) > 0 && (
+                          <div className="text-[10px] text-slate-400">
+                            ธรรมเนียม ฿{Number(tx.fee).toFixed(2)}
+                          </div>
+                        )}
+                      </td>
+
+                      {/* Status */}
+                      <td className="py-3.5 px-3 text-center whitespace-nowrap">
+                        {isPending ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                            รอตรวจสอบ
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                            ยืนยันแล้ว
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                        <div className="inline-flex items-center space-x-1">
+                          {isPending && (
+                            <button
+                              onClick={() => handleConfirmSingle(tx)}
+                              className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
+                              title="ยืนยันรายการ"
+                            >
+                              <Check className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => setEditingTx(tx)}
+                            className="p-1.5 text-slate-400 hover:text-fastwork-600 hover:bg-fastwork-50 rounded-lg transition"
+                            title="แก้ไขข้อมูล"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(tx.id)}
+                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition"
+                            title="ลบรายการ"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         ) : (
+          /* List Card View for Pending Review */
           <div className="divide-y divide-slate-100">
             {transactions.map((tx) => {
               const isIncome = tx.type === 'income';
@@ -408,6 +617,93 @@ export default function TransactionsPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Pagination Toolbar */}
+        {!loading && total > 0 && (
+          <div className="p-4 sm:p-5 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/50">
+            {/* Left: Info & Limit Selector */}
+            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+              <span>
+                แสดง <strong className="text-slate-800">{(page - 1) * limit + 1}</strong> -{' '}
+                <strong className="text-slate-800">{Math.min(page * limit, total)}</strong> จากทั้งหมด{' '}
+                <strong className="text-slate-800">{total.toLocaleString('th-TH')}</strong> รายการ
+              </span>
+
+              <div className="flex items-center gap-1.5 pl-2 sm:border-l border-slate-200">
+                <span>แสดงหน้าละ:</span>
+                <select
+                  value={limit}
+                  onChange={(e) => handleLimitChange(Number(e.target.value))}
+                  className="bg-white border border-slate-200 rounded-lg px-2 py-1 text-xs text-slate-700 font-semibold focus:outline-none focus:border-fastwork-500 cursor-pointer"
+                >
+                  <option value={10}>10</option>
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={100}>100</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Right: Page Nav */}
+            <div className="flex items-center space-x-1 text-xs">
+              <button
+                onClick={() => handlePageChange(page - 1)}
+                disabled={page <= 1}
+                className="p-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-white hover:text-fastwork-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-600 transition"
+                title="หน้าก่อนหน้า"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              {/* Page Number Pills */}
+              <div className="flex items-center space-x-1 px-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter((p) => {
+                    return p === 1 || p === totalPages || Math.abs(p - page) <= 1;
+                  })
+                  .reduce<(number | string)[]>((acc, p, idx, arr) => {
+                    if (idx > 0 && p - (arr[idx - 1] as number) > 1) {
+                      acc.push('...');
+                    }
+                    acc.push(p);
+                    return acc;
+                  }, [])
+                  .map((item, idx) => {
+                    if (item === '...') {
+                      return (
+                        <span key={`dots-${idx}`} className="px-2 text-slate-400">
+                          ...
+                        </span>
+                      );
+                    }
+                    const pNum = Number(item);
+                    return (
+                      <button
+                        key={pNum}
+                        onClick={() => handlePageChange(pNum)}
+                        className={`min-w-[32px] h-8 px-2.5 rounded-xl font-bold transition text-xs ${
+                          page === pNum
+                            ? 'bg-fastwork-500 text-white shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                        }`}
+                      >
+                        {pNum}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(page + 1)}
+                disabled={page >= totalPages}
+                className="p-2 border border-slate-200 rounded-xl text-slate-600 hover:bg-white hover:text-fastwork-600 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-slate-600 transition"
+                title="หน้าถัดไป"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
       </div>
