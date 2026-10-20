@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { summaryApi, authApi, transactionsApi } from '@/lib/api';
 import NextLink from 'next/link';
+import { CategoryIcon } from '@/components/CategoryIcon';
 import {
   TrendingUp,
   TrendingDown,
@@ -401,10 +402,17 @@ export default function DashboardPage() {
                     className="flex items-center justify-between text-sm py-1 border-b border-slate-100 last:border-0"
                   >
                     <div className="flex items-center space-x-2.5 min-w-0">
-                      <span
-                        className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm"
+                      <div
+                        className="w-6 h-6 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-2xs"
                         style={{ backgroundColor: cat.color || '#94A3B8' }}
-                      />
+                      >
+                        <CategoryIcon
+                          icon={cat.icon}
+                          categoryName={cat.name}
+                          type="expense"
+                          size={13}
+                        />
+                      </div>
                       <span className="text-slate-700 font-medium truncate text-xs sm:text-sm">
                         {cat.name}
                       </span>
@@ -517,8 +525,21 @@ export default function DashboardPage() {
                     <div className="flex items-center space-x-2 text-xs text-slate-400 mt-0.5">
                       <span>{new Date(tx.transaction_time || tx.created_at).toLocaleDateString('th-TH')}</span>
                       <span>•</span>
-                      <span className="text-fastwork-600 bg-fastwork-50 px-2 py-0.5 rounded-md font-medium text-[11px]">
-                        {tx.category?.name || 'ทั่วไป'}
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-medium text-[11px]"
+                        style={{
+                          backgroundColor: `${tx.category?.color || '#0066FF'}15`,
+                          color: tx.category?.color || '#0066FF',
+                        }}
+                      >
+                        <CategoryIcon
+                          icon={tx.category?.icon}
+                          categoryName={tx.category?.name || 'ทั่วไป'}
+                          type={tx.type}
+                          size={11}
+                          className="flex-shrink-0"
+                        />
+                        <span className="truncate max-w-[100px]">{tx.category?.name || 'ทั่วไป'}</span>
                       </span>
                     </div>
                   </div>

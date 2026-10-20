@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { transactionsApi, categoriesApi } from '@/lib/api';
 import { useAlert } from '@/context/AlertContext';
+import { CategoryIcon, CategorySelect } from '@/components/CategoryIcon';
 import {
   Check,
   CheckCheck,
@@ -319,21 +320,16 @@ export default function TransactionsPage() {
             <option value="income">เฉพาะรายรับ (Income)</option>
           </select>
 
-          {/* Category Filter */}
-          <select
-            value={filterCategory}
-            onChange={(e) => setFilterCategory(e.target.value)}
-            className="text-xs sm:text-sm bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-2.5 text-slate-700 font-medium focus:outline-none focus:border-fastwork-500 cursor-pointer"
-          >
-            <option value="">ทุกหมวดหมู่ (All Categories)</option>
-            {categories
-              .filter((c) => !filterType || c.type === filterType)
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.type === 'income' ? 'รายรับ' : 'รายจ่าย'})
-                </option>
-              ))}
-          </select>
+          {/* Category Filter with Icons */}
+          <div className="w-full sm:w-64">
+            <CategorySelect
+              categories={categories}
+              value={filterCategory}
+              onChange={(catId) => setFilterCategory(catId)}
+              allOptionLabel="ทุกหมวดหมู่ (All Categories)"
+              filterType={filterType}
+            />
+          </div>
         </div>
       </div>
 
@@ -394,13 +390,20 @@ export default function TransactionsPage() {
                         )}
                         {tx.category && (
                           <span
-                            className="font-medium px-2 py-0.5 rounded-md text-[11px] truncate max-w-[120px]"
+                            className="inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-lg text-[11px] truncate max-w-[140px] shadow-2xs"
                             style={{
-                              backgroundColor: `${tx.category.color}15`,
-                              color: tx.category.color,
+                              backgroundColor: `${tx.category.color || '#64748B'}18`,
+                              color: tx.category.color || '#475569',
                             }}
                           >
-                            {tx.category.name}
+                            <CategoryIcon
+                              icon={tx.category.icon}
+                              categoryName={tx.category.name}
+                              type={tx.category.type}
+                              size={12}
+                              className="flex-shrink-0"
+                            />
+                            <span className="truncate">{tx.category.name}</span>
                           </span>
                         )}
                       </div>
@@ -636,20 +639,15 @@ export default function TransactionsPage() {
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   หมวดหมู่
                 </label>
-                <select
+                <CategorySelect
+                  categories={categories}
                   value={editingTx.category_id || ''}
-                  onChange={(e) =>
-                    setEditingTx({ ...editingTx, category_id: e.target.value })
+                  onChange={(catId) =>
+                    setEditingTx({ ...editingTx, category_id: catId })
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 font-medium"
-                >
-                  <option value="">(ไม่ระบุหมวดหมู่)</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.type === 'income' ? 'รายรับ' : 'รายจ่าย'})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="(ไม่ระบุหมวดหมู่)"
+                  filterType={editingTx.type}
+                />
               </div>
 
               <div>
@@ -806,20 +804,15 @@ export default function TransactionsPage() {
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   หมวดหมู่
                 </label>
-                <select
+                <CategorySelect
+                  categories={categories}
                   value={manualForm.category_id}
-                  onChange={(e) =>
-                    setManualForm({ ...manualForm, category_id: e.target.value })
+                  onChange={(catId) =>
+                    setManualForm({ ...manualForm, category_id: catId })
                   }
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-fastwork-500/20 focus:border-fastwork-500 font-medium"
-                >
-                  <option value="">(ไม่ระบุหมวดหมู่)</option>
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} ({c.type === 'income' ? 'รายรับ' : 'รายจ่าย'})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="(ไม่ระบุหมวดหมู่)"
+                  filterType={manualForm.type}
+                />
               </div>
 
               <div>
